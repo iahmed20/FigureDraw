@@ -1,0 +1,2635 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure Studies</title>
+<style>
+:root{
+  --bg:#e3e5e9; --panel:#f4f5f7; --panel-2:#e9ebef; --ink:#14161a; --muted:#59606c;
+  --line:#c5cad2; --line-strong:#8a92a0; --accent:#2a44c4; --accent-ink:#ffffff;
+  --font-ui:"Avenir Next","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --panel:#171a20; --panel-2:#20242c; --ink:#e9ebef; --muted:#9aa2ae;
+  --line:#313743; --line-strong:#5b6473; --accent:#8b9dff; --accent-ink:#0b0e1c;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--font-ui);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.4}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.btn{background:transparent;border:1px solid var(--line-strong);border-radius:6px;padding:7px 10px;text-align:center;line-height:1.2}
+.btn:hover:not(:disabled){background:var(--panel-2)}
+.btn[aria-pressed="true"],.btn[aria-pressed="true"]:hover:not(:disabled){background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn.primary,.btn.primary:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.1)}
+
+/* layout */
+.desk{display:grid;grid-template-columns:clamp(190px,17vw,226px) minmax(0,1fr) clamp(170px,26vw,344px);gap:14px;height:100vh;padding:12px}
+.desk.ref-left{grid-template-columns:clamp(170px,26vw,344px) minmax(0,1fr) clamp(190px,17vw,226px)}
+.desk.ref-left .tools{order:3}
+.desk.ref-left .stage{order:2}
+.desk.ref-left .ref-col{order:1}
+
+/* tools */
+.tools{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:14px;min-height:0}
+.brand{font:italic 500 21px/1.1 var(--font-display);letter-spacing:.005em}
+.group{display:grid;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.pair,.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool{display:flex;justify-content:space-between;align-items:center;text-align:left}
+.tool kbd,.lkey{font:inherit;font-size:12px;opacity:.65}
+.row-label{display:flex;justify-content:space-between;align-items:baseline;color:var(--muted);font-size:13px}
+.row-label output{color:var(--ink);font-variant-numeric:tabular-nums}
+.dim{opacity:.45}
+input[type=range]{width:100%;accent-color:var(--ink);margin:6px 0 0}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.swatch{aspect-ratio:1;border:1px solid var(--line-strong);border-radius:4px;background:var(--c);padding:0}
+.swatch[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.custom{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.custom input{width:30px;height:26px;padding:0;border:1px solid var(--line-strong);border-radius:4px;background:none}
+.layers{display:grid;gap:6px}
+.layer{display:grid;grid-template-columns:34px 1fr auto;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.layer.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.eye{border:0;background:transparent;height:34px;display:grid;place-items:center;color:var(--ink)}
+.eye[aria-pressed="false"]{color:var(--muted)}
+.lname{border:0;background:transparent;text-align:left;padding:8px 6px;height:34px}
+.lkey{padding-right:10px}
+.themes{margin-top:auto}
+
+/* stage */
+.stage{display:flex;flex-direction:column;min-width:0;min-height:0}
+.bar{position:relative;display:flex;align-items:center;gap:16px;min-height:62px;padding:0 0 10px}
+.clock{font:500 42px/1 var(--font-display);font-variant-numeric:tabular-nums lining-nums;min-width:4.3ch;white-space:nowrap}
+.clock.idle{font:italic 500 24px/1 var(--font-display);min-width:0}
+.bar-meta{display:grid;gap:2px;min-width:0;flex:1 1 120px}
+.bar-meta b{font-weight:600}
+.bar-meta span{color:var(--muted);font-size:13px}
+.bar-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 1 auto}
+.progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line)}
+.progress i{display:block;height:100%;width:100%;background:var(--accent);transition:width .12s linear}
+.canvas-wrap{flex:1;min-height:0;container-type:size;display:grid;place-items:start center;margin-top:12px}
+.frame{position:relative;height:min(100cqh,133.333cqw);aspect-ratio:3/4;box-shadow:0 0 0 1px var(--line-strong),0 10px 30px rgba(0,0,0,.12)}
+.mirror-layer{position:absolute;inset:0}
+.mirror-layer.mirror{transform:scaleX(-1)}
+#canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;background:#fbfbfa}
+#canvas.brush-cursor{cursor:none}
+#canvas.cross{cursor:crosshair}
+.cursor{position:absolute;pointer-events:none;border:1px solid #fff;mix-blend-mode:difference;border-radius:50%;transform:translate(-50%,-50%)}
+.sel{position:absolute;border:1.5px dashed var(--accent);cursor:move;touch-action:none}
+.hd{position:absolute;width:14px;height:14px;background:#fff;border:1.5px solid var(--accent);border-radius:3px;transform:translate(-50%,-50%);touch-action:none}
+.hd[data-h="nw"]{left:0;top:0;cursor:nwse-resize}.hd[data-h="ne"]{left:100%;top:0;cursor:nesw-resize}
+.hd[data-h="se"]{left:100%;top:100%;cursor:nwse-resize}.hd[data-h="sw"]{left:0;top:100%;cursor:nesw-resize}
+.hd[data-h="rot"]{left:50%;top:-28px;border-radius:50%;cursor:grab}
+.xform{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;z-index:5;white-space:nowrap;font-size:13px}
+.veil{position:absolute;inset:0;z-index:4;display:grid;place-items:center;text-align:center;background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:blur(4px)}
+.veil b{display:block;font:italic 500 30px/1.1 var(--font-display)}
+.veil span{color:var(--muted)}
+
+/* reference */
+.ref-col{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;overflow:auto}
+.ref-frame{position:relative;aspect-ratio:3/4;width:100%;background:var(--panel-2);border:1px solid var(--line);overflow:hidden;touch-action:none;cursor:grab;flex:none}
+.ref-frame.grabbing{cursor:grabbing}
+.ref-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.ref-empty{position:absolute;inset:0;display:grid;place-content:center;gap:6px;text-align:center;padding:24px;color:var(--muted)}
+.ref-empty b{font:italic 500 20px/1.2 var(--font-display);color:var(--ink)}
+.ref-tools{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.ref-tools .wide{grid-column:span 2}
+.ref-load{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ref-count{color:var(--muted);font-size:13px}
+.ref-credit-row{display:flex;gap:8px;align-items:flex-start}
+.ref-credit-row .ref-credit{flex:1;min-width:0}
+#ref-hide{flex:none;padding:4px 9px;font-size:12px}
+.ref-credit{font-size:12px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.ref-credit a{color:var(--ink)}
+.ref-prefs{display:grid;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+.ref-online-opts{display:grid;gap:8px}
+.ref-pref{display:grid;gap:4px;font-size:13px}
+.ref-pref span{color:var(--muted)}
+.ref-pref select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;width:100%}
+.ref-note{margin:0;font-size:12px;color:var(--muted)}
+
+/* dialogs */
+dialog{border:1px solid var(--line-strong);border-radius:12px;background:var(--panel);color:var(--ink);padding:0;width:min(640px,94vw);max-height:92vh}
+dialog::backdrop{background:rgba(8,10,14,.55)}
+.dlg{padding:22px 24px;display:grid;gap:16px}
+.dlg h2{margin:0;font:italic 500 25px/1.15 var(--font-display)}
+.dlg p{margin:0;color:var(--muted)}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.plans{display:grid;gap:8px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt input{margin:4px 0 0}
+.opt small{grid-column:2;color:var(--muted);font-size:13px}
+.opt input[type=text]{grid-column:2;margin-top:8px;padding:7px 9px;border:1px solid var(--line-strong);border-radius:6px;background:var(--panel);width:100%}
+.checks{display:grid;gap:8px}
+.checks label{display:flex;gap:8px;align-items:center}
+.setup-refs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+.setup-refs span{color:var(--muted);flex:1 1 200px}
+.plan-info{min-height:1.4em;color:var(--muted)}
+.plan-info.err{color:#c0392b}
+:root[data-theme="dark"] .plan-info.err{color:#ff8a80}
+#review{width:min(1100px,95vw)}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;overflow:auto;max-height:58vh;padding:2px}
+.shot{margin:0}
+.shot img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:#fbfbfa;border:1px solid var(--line)}
+.shot figcaption{font-size:13px;color:var(--muted);margin-top:5px}
+#brush-dlg{width:min(900px,96vw)}
+.bs-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bs-note{color:var(--muted);font-size:13px;margin:0}
+#bs-preview{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:8px;background:#fbfbfa}
+.bs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;max-height:44vh;overflow:auto;padding:2px 4px 2px 2px}
+.bs-sec{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;align-content:start;min-width:0}
+.bs-sec h3{margin:0;font:600 12px/1 var(--font-ui);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.bs-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;font-size:13px;align-items:center}
+.bs-row input[type=range],.bs-row select{grid-column:1/-1;width:100%;margin:0}
+.bs-row select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px}
+.bs-row output{font-variant-numeric:tabular-nums;color:var(--muted)}
+#bs-curve{width:100%;max-width:240px;height:auto;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);touch-action:none;cursor:grab}
+.bs-presets{display:flex;gap:6px;flex-wrap:wrap}
+.bs-presets .btn{padding:4px 9px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 14px;border-radius:8px;z-index:100;max-width:90vw}
+
+@media (max-width:1000px){
+  .desk{gap:10px;padding:8px}
+  .tools{padding:10px;gap:12px}
+  .group{padding-top:12px}
+  .btn{padding:7px 5px;font-size:13px}
+  .clock{font-size:34px}
+  .bar{gap:12px}
+}
+@media (max-width:680px){
+  .desk,.desk.ref-left{grid-template-columns:1fr;height:auto;min-height:100vh}
+  .desk .stage,.desk.ref-left .stage{order:1}
+  .desk .ref-col,.desk.ref-left .ref-col{order:2;overflow:visible;align-items:center}
+  .desk .tools,.desk.ref-left .tools{order:3}
+  .ref-col>*{width:min(100%,300px)}
+  .canvas-wrap{container-type:normal;display:block}
+  .frame{height:auto;width:100%}
+  .bar{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){.progress i{transition:none}}
+</style>
+</head>
+<body>
+<div class="desk" id="desk">
+
+  <aside class="tools" aria-label="Drawing tools">
+    <div class="brand">Figure Studies</div>
+
+    <div class="group">
+      <div class="pair">
+        <button class="btn" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+        <button class="btn" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+      </div>
+      <div class="pair">
+        <button class="btn" id="clear" title="Clear every layer">Clear</button>
+        <button class="btn" id="export">Export</button>
+      </div>
+    </div>
+
+    <div class="group grid2" id="tool-group">
+      <button class="btn" data-tool="brush" title="Brush (B)">Brush</button>
+      <button class="btn" data-tool="eraser" title="Eraser (E)">Eraser</button>
+      <button class="btn" data-tool="blend" title="Blending nub: smudges pencil and charcoal only (N)">Blend</button>
+      <button class="btn" data-tool="lasso" title="Lasso, then move, scale or rotate (L)">Lasso</button>
+      <button class="btn" data-tool="dropper" title="Pick a color from the drawing (I, or Alt+click)">Pick color</button>
+    </div>
+
+    <div class="group">
+      <div class="grid2" id="brush-types">
+        <button class="btn" data-brush="pencil">Pencil</button>
+        <button class="btn" data-brush="ink">Ink</button>
+        <button class="btn" data-brush="charcoal">Charcoal</button>
+        <button class="btn" data-brush="soft">Soft</button>
+      </div>
+      <div>
+        <label class="row-label" for="size"><span>Size</span><output id="size-val"></output></label>
+        <input type="range" id="size" min="1" max="24" value="3">
+      </div>
+      <div>
+        <label class="row-label" for="opacity"><span id="opacity-label">Opacity</span><output id="opacity-val"></output></label>
+        <input type="range" id="opacity" min="5" max="100" value="55">
+      </div>
+      <button class="btn" id="brush-edit" title="Shape, grain, angle, pressure curve, tilt, taper">Brush settings…</button>
+    </div>
+
+    <div class="group">
+      <div class="row-label"><span>Color</span></div>
+      <div class="swatches" id="swatches"></div>
+      <label class="custom"><input type="color" id="color-custom" value="#111111"><span>Custom color</span></label>
+    </div>
+
+    <div class="group">
+      <div class="row-label"><span>Layers</span></div>
+      <div class="layers" id="layers"></div>
+    </div>
+
+    <div class="group themes">
+      <div class="pair">
+        <button class="btn" data-theme-btn="light">Light</button>
+        <button class="btn" data-theme-btn="dark">Dark</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="stage" aria-label="Canvas">
+    <div class="bar">
+      <div class="clock idle" id="clock">Free draw</div>
+      <div class="bar-meta"><b id="meta-main"></b><span id="meta-sub"></span></div>
+      <div class="bar-actions">
+        <button class="btn primary" id="new-session">New session</button>
+        <button class="btn" id="pause">Pause</button>
+        <button class="btn" id="skip">Next pose</button>
+        <button class="btn" id="restart" title="Clear the drawing and reset the clock">Restart pose</button>
+        <button class="btn" id="end">End session</button>
+      </div>
+      <div class="progress" id="progress" hidden><i id="progress-fill"></i></div>
+    </div>
+
+    <div class="canvas-wrap">
+      <div class="frame" id="frame">
+        <div class="mirror-layer" id="mirror-layer">
+          <canvas id="canvas" width="1350" height="1800" aria-label="Drawing canvas"></canvas>
+          <div class="sel" id="sel" hidden>
+            <i class="hd" data-h="nw"></i><i class="hd" data-h="ne"></i><i class="hd" data-h="se"></i><i class="hd" data-h="sw"></i><i class="hd" data-h="rot"></i>
+          </div>
+          <div class="cursor" id="cursor" hidden></div>
+        </div>
+        <div class="xform" id="xform" hidden>
+          <span>Drag to move. Corners scale. The top handle rotates.</span>
+          <button class="btn primary" id="sel-apply">Apply</button>
+          <button class="btn" id="sel-cancel">Cancel</button>
+        </div>
+        <div class="veil" id="veil" hidden><div><b>Paused</b><span>Press Space or Resume to continue.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="ref-col" aria-label="Reference">
+    <div class="ref-frame" id="ref-frame">
+      <img id="ref-img" alt="Reference pose" hidden>
+      <div class="ref-empty" id="ref-empty">
+        <b id="ref-empty-title">No reference yet</b>
+        <span>Load some figure photos below. They stay on your computer.</span>
+      </div>
+    </div>
+    <div class="ref-tools">
+      <button class="btn wide" id="ref-change" title="Show a different reference (R)">Change reference</button>
+      <button class="btn" id="ref-flip" aria-pressed="false" title="Mirror the reference and the canvas (F)">Flip</button>
+      <button class="btn" id="ref-swap" title="Move the reference to the other side (S)">Swap</button>
+      <button class="btn" id="zoom-out" aria-label="Zoom reference out">&minus;</button>
+      <button class="btn" id="zoom-in" aria-label="Zoom reference in">+</button>
+      <button class="btn wide" id="zoom-reset">Reset zoom</button>
+    </div>
+    <div class="ref-load">
+      <button class="btn" id="load-images">Load images</button>
+      <button class="btn" id="load-folder">Load folder</button>
+    </div>
+    <div class="ref-credit-row"><div class="ref-credit" id="ref-credit" hidden></div>
+      <button class="btn" id="ref-hide" hidden title="Not a useful figure reference? Hide it for good.">Hide this one</button></div>
+    <div class="ref-prefs" hidden>
+      <label class="ref-pref" for="ref-source"><span>References</span>
+        <select id="ref-source">
+          <option value="mine">My images</option>
+          <option value="poses">Posemaniacs 3D poses</option>
+          <option value="online">Online photos (royalty-free)</option>
+          <option value="all">Everything</option>
+        </select></label>
+      <div class="ref-online-opts" id="ref-online-opts" hidden>
+        <label class="ref-pref" for="ref-content"><span>Photos show</span>
+          <select id="ref-content">
+            <option value="clothed">Clothed figures</option>
+            <option value="nude">Nude figure studies</option>
+            <option value="both">Clothed and nude</option>
+          </select></label>
+        <p class="ref-note" id="ref-note"></p>
+      </div>
+    </div>
+    <div class="ref-count" id="ref-count"></div>
+    <input type="file" id="file-images" accept="image/*" multiple hidden>
+    <input type="file" id="file-folder" webkitdirectory multiple hidden>
+  </aside>
+</div>
+
+<dialog id="setup" aria-labelledby="setup-title">
+  <div class="dlg">
+    <h2 id="setup-title">New session</h2>
+    <div class="plans" id="plans">
+      <label class="opt"><input type="radio" name="preset" value="gesture"><b>Gesture</b><small>10 poses at 30 seconds, then 5 at 1 minute</small></label>
+      <label class="opt"><input type="radio" name="preset" value="warmup"><b>Warm-up</b><small>Gestures building to a 5 minute pose, about 20 minutes</small></label>
+      <label class="opt"><input type="radio" name="preset" value="class"><b>Life class</b><small>Short poses, then 10 and 25 minute studies, about 1 hour</small></label>
+      <label class="opt"><input type="radio" name="preset" value="long"><b>One long study</b><small>A single 30 minute pose</small></label>
+      <label class="opt"><input type="radio" name="preset" value="custom"><b>Custom</b><small>Counts and times, separated by commas. Example: 5x30s, 3x1m, 2x5m</small>
+        <input type="text" id="plan-custom" spellcheck="false" autocomplete="off" placeholder="5x30s, 3x1m, 2x5m" aria-label="Custom pose plan"></label>
+    </div>
+    <div class="plan-info" id="plan-info" role="status"></div>
+    <div class="checks">
+      <label><input type="checkbox" id="opt-shuffle"> Shuffle the references</label>
+      <label><input type="checkbox" id="opt-sound"> Play a sound when a pose ends</label>
+    </div>
+    <div class="setup-refs">
+      <span id="setup-refs-text"></span>
+      <button class="btn" id="setup-images">Load images</button>
+      <button class="btn" id="setup-folder">Load folder</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="setup-cancel">Cancel</button>
+      <button class="btn primary" id="setup-start">Start session</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="brush-dlg" aria-labelledby="bs-title">
+  <div class="dlg">
+    <div class="bs-head"><h2 id="bs-title">Brush settings</h2><span class="bs-note">Changes save automatically</span></div>
+    <canvas id="bs-preview" width="675" height="220" aria-label="Live preview of the brush"></canvas>
+    <div class="bs-grid" id="bs-sections"></div>
+    <div class="actions">
+      <button class="btn" id="bs-reset">Reset this brush</button>
+      <button class="btn primary" id="bs-done">Done</button>
+    </div>
+  </div>
+</dialog>
+<dialog id="confirm" aria-labelledby="confirm-msg">
+  <div class="dlg">
+    <p id="confirm-msg" style="color:var(--ink)"></p>
+    <div class="actions">
+      <button class="btn" id="confirm-no">Cancel</button>
+      <button class="btn primary" id="confirm-yes">OK</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="export-dlg" aria-labelledby="export-title">
+  <div class="dlg">
+    <h2 id="export-title">Export</h2>
+    <p>The PNG is the finished drawing on paper. The ZIP adds every layer as its own transparent PNG, plus the current reference.</p>
+    <div class="actions">
+      <button class="btn" id="export-close">Close</button>
+      <button class="btn" id="export-zip">Layers (ZIP)</button>
+      <button class="btn primary" id="export-png">PNG</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="review" aria-labelledby="review-title">
+  <div class="dlg">
+    <h2 id="review-title">Session complete</h2>
+    <p id="review-count"></p>
+    <div class="sheet" id="sheet"></div>
+    <div class="actions">
+      <button class="btn" id="review-close">Close</button>
+      <button class="btn" id="review-zip">All drawings (ZIP)</button>
+      <button class="btn" id="review-sheet">Contact sheet (PNG)</button>
+      <button class="btn primary" id="review-new">New session</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="unsaved" aria-labelledby="unsaved-title">
+  <div class="dlg">
+    <h2 id="unsaved-title">Save your drawings?</h2>
+    <p id="unsaved-msg"></p>
+    <div class="actions">
+      <button class="btn" id="unsaved-back">Back</button>
+      <button class="btn" id="unsaved-discard">Close without saving</button>
+      <button class="btn primary" id="unsaved-save">Save all (ZIP)</button>
+    </div>
+  </div>
+</dialog>
+<script>
+(() => {
+'use strict';
+
+/* ------------------------------------------------------------------ helpers */
+// The canvas is 1.5x the 900x1200 layout size so lines stay sharp on high-density screens.
+// Brush sizes are still expressed in 900-wide units and multiplied by SC when drawing.
+const W = 1350, H = 1800, SC = W / 900, PAPER = '#fbfbfa';
+const TILE = 128, TX = Math.ceil(W / TILE), TY = Math.ceil(H / TILE);
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const pad2 = n => String(n).padStart(2, '0');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('figstudies.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('figstudies.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+const stampName = () => { const d = new Date(); return `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}`; };
+function fmtClock(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+  return h ? `${h}:${pad2(m)}:${pad2(r)}` : `${m}:${pad2(r)}`;
+}
+function humanDur(s) {
+  if (s < 60) return `${s} s`;
+  return s % 60 === 0 ? `${s / 60} min` : `${Math.floor(s / 60)} min ${s % 60} s`;
+}
+function humanTotal(s) {
+  const m = Math.round(s / 60);
+  if (s < 60) return `${s} s`;
+  return m < 90 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`;
+}
+
+/* -------------------------------------------------------------------- state */
+const state = {
+  tool: 'brush', brush: 'pencil', color: '#111111', layer: 'gesture', mirror: false,
+  sizes: { pencil: 4, ink: 5, charcoal: 22, soft: 48, blend: 24, eraser: 28 },
+  opacity: { pencil: 55, ink: 100, charcoal: 90, soft: 70, blend: 60, eraser: 100 }
+};
+const session = { phase: 'free', plan: [], i: 0, total: 0, remaining: 0, endAt: 0, order: [], shots: [], strokes: 0, timer: 0, sound: true, saved: false };
+const refs = [];            // { url, name, file }
+let refIdx = -1;
+const refView = { z: 1, x: 0, y: 0 };
+
+/* ------------------------------------------------------------------- layers */
+// bottom to top
+const layers = [
+  { id: 'gesture', name: 'Gesture' },
+  { id: 'structure', name: 'Structure' },
+  { id: 'tone', name: 'Tone' },
+  { id: 'contour', name: 'Contour' }
+].map(d => {
+  const canvas = mk(W, H), g = canvas.getContext('2d');
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  const dry = mk(W, H), dg = dry.getContext('2d');
+  dg.imageSmoothingEnabled = true; dg.imageSmoothingQuality = 'high';
+  return { ...d, visible: true, canvas, g, dry, dg };
+});
+const layerById = id => layers.find(l => l.id === id);
+// Each layer has two sheets: 'dry' (pencil, charcoal; the blending nub moves these) and 'wet'
+// (ink, soft brush). Dry media sit under the wet sheet within the same layer.
+const SUBS = ['dry', 'wet'];
+const subCanvas = (L, sub) => sub === 'dry' ? L.dry : L.canvas;
+const subCtx = (L, sub) => sub === 'dry' ? L.dg : L.g;
+function layerImage(L) {
+  const c = mk(W, H), g = c.getContext('2d');
+  g.drawImage(L.dry, 0, 0); g.drawImage(L.canvas, 0, 0);
+  return c;
+}
+const activeLayer = () => layerById(state.layer);
+
+const canvas = $('#canvas'), ctx = canvas.getContext('2d');
+const mirrorLayer = $('#mirror-layer'), cursorEl = $('#cursor'), selEl = $('#sel');
+
+const cacheBelow = mk(W, H), cbg = cacheBelow.getContext('2d');
+const cacheAbove = mk(W, H), cag = cacheAbove.getContext('2d');
+let cacheFor = null;
+function buildStrokeCaches(L) {
+  const i = layers.indexOf(L);
+  cbg.globalAlpha = 1; cbg.fillStyle = PAPER; cbg.fillRect(0, 0, W, H);
+  cag.clearRect(0, 0, W, H);
+  layers.forEach((M, j) => {
+    if (j === i || !M.visible) return;
+    const g = j < i ? cbg : cag;
+    g.drawImage(M.dry, 0, 0); g.drawImage(M.canvas, 0, 0);
+  });
+  cacheFor = stroke;
+}
+function composite() {
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  if (stroke && cacheFor === stroke && !sel && lasso.pts.length < 2) {
+    const L = stroke.L, liveBuf = stroke.engine === 'path' || stroke.engine === 'stamp';
+    ctx.drawImage(cacheBelow, 0, 0);
+    ctx.drawImage(L.dry, 0, 0);
+    if (liveBuf && stroke.dry) drawLiveStroke();
+    ctx.drawImage(L.canvas, 0, 0);
+    if (liveBuf && !stroke.dry) drawLiveStroke();
+    ctx.drawImage(cacheAbove, 0, 0);
+    return;
+  }
+  ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H);
+  const live = L => stroke && stroke.L === L && (stroke.engine === 'path' || stroke.engine === 'stamp');
+  const drawLive = drawLiveStroke;
+  for (const L of layers) {
+    if (L.visible) ctx.drawImage(L.dry, 0, 0);
+    if (live(L) && stroke.dry) drawLive();
+    if (L.visible) ctx.drawImage(L.canvas, 0, 0);
+    if (live(L) && !stroke.dry) drawLive();
+  }
+  if (sel) {
+    ctx.save(); ctx.translate(sel.cx, sel.cy); ctx.rotate(sel.rot); ctx.scale(sel.s, sel.s);
+    for (const part of sel.parts) ctx.drawImage(part.canvas, -sel.w / 2, -sel.h / 2);
+    ctx.restore();
+  }
+  if (lasso.pts.length > 1) {
+    ctx.save(); ctx.lineWidth = 1.5 * SC; ctx.strokeStyle = '#2a44c4'; ctx.setLineDash([6 * SC, 5 * SC]);
+    ctx.beginPath(); ctx.moveTo(lasso.pts[0].x, lasso.pts[0].y);
+    for (let i = 1; i < lasso.pts.length; i++) ctx.lineTo(lasso.pts[i].x, lasso.pts[i].y);
+    ctx.stroke(); ctx.restore();
+  }
+}
+function drawLiveStroke() {
+  ctx.globalAlpha = stroke.alpha;
+  ctx.drawImage(stroke.grain ? grainBuf : strokeBuf, 0, 0);
+  if (stroke.tail) ctx.drawImage(tailBuf, 0, 0);
+  ctx.globalAlpha = 1;
+}
+let compQueued = false;
+function queueComposite() {
+  if (compQueued) return;
+  compQueued = true;
+  requestAnimationFrame(() => { compQueued = false; if (stroke) { flushTail(); regrain(); } composite(); });
+}
+function flatten() {
+  const c = mk(W, H), g = c.getContext('2d');
+  g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+  for (const L of layers) if (L.visible) { g.drawImage(L.dry, 0, 0); g.drawImage(L.canvas, 0, 0); }
+  return c;
+}
+
+/* ------------------------------------------------------------------ brushes */
+// engine 'path'  : real vector strokes into a stroke buffer (crisp edges, no smoothing lag)
+// engine 'stamp' : soft/textured tips stamped along the path, flow builds up while you draw
+// engine 'erase' : vector stroke that removes pixels straight from the layer
+// Engine-level facts about each brush. Everything about how a brush FEELS lives in BRUSH_DEFAULTS
+// below, which the brush editor changes and saves.
+// engine 'path'  : vector strokes (ink), re-rendered per segment so the end can be tapered on lift
+// engine 'stamp' : tips stamped along the path; the newest stretch stays in a tail buffer so it
+//                  can fade out when you lift (pencil, charcoal, soft)
+// engine 'erase' : removes pixels from both sheets of the layer
+// engine 'smudge': the blending nub; it only drags dry media
+// dry: true      : the mark lands on the layer's dry-media sheet, the only sheet the nub can move
+const BRUSHES = {
+  pencil:   { engine: 'stamp',  dry: true,  min: 1, max: 24,  alpha: 1, speedMin: .3 },
+  ink:      { engine: 'path',   dry: false, min: 1, max: 24,  alpha: 1, speedMin: .2 },
+  charcoal: { engine: 'stamp',  dry: true,  min: 4, max: 80,  alpha: 1, speedMin: .35 },
+  soft:     { engine: 'stamp',  dry: false, min: 8, max: 140, alpha: 1, speedMin: .45 },
+  blend:    { engine: 'smudge', dry: true,  min: 4, max: 120, alpha: 1, speedMin: .5 },
+  eraser:   { engine: 'erase',  dry: false, min: 4, max: 140, alpha: 1, speedMin: 1 }
+};
+const OPACITY_DEFAULT = { pencil: 55, ink: 100, charcoal: 90, soft: 70, blend: 60, eraser: 100 };
+const LINEAR = [[0, 0], [1 / 3, 1 / 3], [2 / 3, 2 / 3], [1, 1]];
+// Feel settings, in the units the editor shows (% unless noted):
+//   shape, grain, grainMode ('paper' = tooth fixed to the page, 'moving' = texture inside the tip)
+//   spacing, scatter, sizeJit, flowJit           : stamp spacing and per-stamp randomness
+//   angleMode ('fixed' | 'direction' | 'tilt' | 'twist' | 'random'), angle, angleJit (degrees)
+//   curve                                        : pressure curve points [[in, out], …]
+//   sizeMin                                      : size at the lightest pressure
+//   flowMin / flowMax                            : opacity of each stamp from lightest to firmest
+//   tiltSize / tiltFlow / tiltShape              : as the pen tilts: bigger, lighter, flatter tip
+//   taperIn / taperOut (px), minK / minOut       : start and end of each stroke
+//   speed                                        : with a mouse or finger, fast motion = lighter touch
+//   pull                                         : blending nub, how much colour it picks up per dab
+const BRUSH_DEFAULTS = {
+  pencil:   { shape: 'hard', grain: 'fine', grainMode: 'paper', spacing: 12, scatter: 0, sizeJit: 5, flowJit: 20,
+              angleMode: 'tilt', angle: 0, angleJit: 0, curve: LINEAR, sizeMin: 60, flowMin: 5, flowMax: 25,
+              tiltSize: 120, tiltFlow: 35, tiltShape: 65, taperIn: 6, minK: 60, taperOut: 10, minOut: 55, speed: 20 },
+  ink:      { curve: LINEAR, sizeMin: 30, tiltSize: 0, taperIn: 8, minK: 45, taperOut: 10, minOut: 40, speed: 30 },
+  charcoal: { shape: 'flat', grain: 'coarse', grainMode: 'paper', spacing: 5, scatter: 3, sizeJit: 8, flowJit: 25,
+              angleMode: 'fixed', angle: -37, angleJit: 3, curve: LINEAR, sizeMin: 68, flowMin: 20, flowMax: 60,
+              tiltSize: 60, tiltFlow: 20, tiltShape: 0, taperIn: 6, minK: 70, taperOut: 12, minOut: 60, speed: 12 },
+  soft:     { shape: 'soft', grain: null, grainMode: 'paper', spacing: 7, scatter: 3, sizeJit: 8, flowJit: 15,
+              angleMode: 'fixed', angle: 0, angleJit: 0, curve: LINEAR, sizeMin: 75, flowMin: 5, flowMax: 20,
+              tiltSize: 50, tiltFlow: 0, tiltShape: 0, taperIn: 14, minK: 55, taperOut: 16, minOut: 60, speed: 8 },
+  blend:    { curve: LINEAR, sizeMin: 70, pull: 20, speed: 10 },
+  eraser:   { curve: LINEAR, sizeMin: 100, speed: 0 }
+};
+const BS = (() => { const v = store.get('brushes.v1', {}); return v && typeof v === 'object' ? v : {}; })();
+const saveBS = () => store.set('brushes.v1', BS);
+const brushSetting = (key, k) => (BS[key] && BS[key][k] !== undefined) ? BS[key][k] : BRUSH_DEFAULTS[key][k];
+const feelCache = {};
+// The engine reads brushes through feel(key): settings converted to the numbers it uses, plus a
+// lookup table for the pressure curve. Editing a setting just drops the cached entry.
+function feel(key) {
+  if (feelCache[key]) return feelCache[key];
+  const b = BRUSHES[key], u = { ...BRUSH_DEFAULTS[key], ...(BS[key] || {}) }, pc = v => (v || 0) / 100;
+  const F = {
+    engine: b.engine, dry: b.dry, alpha: b.alpha, min: b.min, max: b.max, speedMin: b.speedMin,
+    kind: u.shape || 'hard', grain: u.grain || null, grainMode: u.grainMode || 'paper',
+    spacing: Math.max(.02, pc(u.spacing ?? 10)), scatter: pc(u.scatter), sizeJit: pc(u.sizeJit), flowJit: pc(u.flowJit),
+    angleMode: u.angleMode || 'fixed', angle: (u.angle || 0) * Math.PI / 180, angleJit: (u.angleJit || 0) * Math.PI / 180,
+    sizeMin: pc(u.sizeMin ?? 100), flowMin: pc(u.flowMin), flowMax: pc(u.flowMax ?? 100),
+    tiltSize: pc(u.tiltSize), tiltFlow: pc(u.tiltFlow), tiltShape: pc(u.tiltShape),
+    taperIn: u.taperIn || 0, minK: pc(u.minK ?? 100), taperOut: u.taperOut || 0, minOut: pc(u.minOut ?? 100),
+    speedK: pc(u.speed), pickup: pc(u.pull ?? 20), lut: makeLUT(u.curve || LINEAR)
+  };
+  F.dia = (sz, p) => sz * (F.sizeMin + (1 - F.sizeMin) * p);
+  F.flow = p => F.flowMin + (F.flowMax - F.flowMin) * p;
+  return (feelCache[key] = F);
+}
+// Monotone cubic (Fritsch–Carlson) through the curve points, sampled into a 257-entry table,
+// so the curve never overshoots or dips the way a plain spline can.
+function makeLUT(pts) {
+  const P = pts.slice().sort((a, b) => a[0] - b[0]), n = P.length;
+  const xs = P.map(p => p[0]), ys = P.map(p => p[1]), d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d[i] = (ys[i + 1] - ys[i]) / Math.max(1e-6, xs[i + 1] - xs[i]);
+  m[0] = d[0]; m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { m[i] = m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+    if (s > 9) { const t = 3 / Math.sqrt(s); m[i] = t * a * d[i]; m[i + 1] = t * b * d[i]; }
+  }
+  const lut = new Float32Array(257);
+  let seg = 0;
+  for (let j = 0; j <= 256; j++) {
+    const x = j / 256;
+    while (seg < n - 2 && x > xs[seg + 1]) seg++;
+    const h = Math.max(1e-6, xs[seg + 1] - xs[seg]), t = clamp((x - xs[seg]) / h, 0, 1), t2 = t * t, t3 = t2 * t;
+    lut[j] = clamp((2 * t3 - 3 * t2 + 1) * ys[seg] + (t3 - 2 * t2 + t) * h * m[seg] + (-2 * t3 + 3 * t2) * ys[seg + 1] + (t3 - t2) * h * m[seg + 1], 0, 1);
+  }
+  return v => lut[Math.round(clamp(v, 0, 1) * 256)];
+}
+const ease = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const TIP_VARIANTS = 4;
+const LEVELS = [16, 32, 64, 128, 256];
+const tipCache = new Map(), tintCache = new Map();
+function baseTip(kind, level, v = 0) {
+  const key = kind + level + ':' + v;
+  if (tipCache.has(key)) return tipCache.get(key);
+  const c = mk(level, level), g = c.getContext('2d'), img = g.createImageData(level, level), r0 = level / 2;
+  // Seeded randomness so each variant is stable between strokes.
+  let seed = (v + 1) * 2654435761 >>> 0;
+  const rnd = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const ph = [rnd() * 6.283, rnd() * 6.283, rnd() * 6.283];
+  for (let y = 0; y < level; y++) for (let x = 0; x < level; x++) {
+    const dx = (x + .5 - r0) / r0, dy = (y + .5 - r0) / r0, r = Math.hypot(dx, dy);
+    let a;
+    if (r >= 1) a = 0;
+    else if (kind === 'soft') a = Math.pow(1 - r, 1.7);
+    else if (kind === 'hard') { const t = 1 - clamp((r - .7) / .3, 0, 1); a = t * t * (3 - 2 * t); }
+    else if (kind === 'flat') {
+      // A chisel-edged stick: long axis x, short axis y, crisp edges with a slightly ragged side.
+      // It stays inside the unit circle so it can be rotated to the brush angle without clipping.
+      const e = 1 + .1 * Math.sin(dx * 9 + ph[0]) + .06 * Math.sin(dx * 23 + ph[1]);
+      const ax = Math.abs(dx) / .9, ay = Math.abs(dy) / (.3 * e);
+      const q = Math.pow(Math.pow(ax, 6) + Math.pow(ay, 6), 1 / 6);
+      const t = 1 - clamp((q - .86) / .14, 0, 1);
+      a = t * t * (3 - 2 * t) * (.6 + .4 * rnd());
+    }
+    else {
+      // Lumpy outline (stays inside the unit circle so rotation never clips) and a speckled body.
+      const th = Math.atan2(dy, dx);
+      const edge = .82 + .06 * Math.sin(3 * th + ph[0]) + .05 * Math.sin(5 * th + ph[1]) + .04 * Math.sin(9 * th + ph[2]);
+      const t = 1 - clamp((r - edge * .5) / (edge * .5), 0, 1);
+      a = r > edge ? 0 : t * t * (3 - 2 * t) * (.55 + .45 * rnd());
+    }
+    const i = (y * level + x) * 4;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = 255; img.data[i + 3] = Math.round(a * 255);
+  }
+  g.putImageData(img, 0, 0);
+  tipCache.set(key, c);
+  return c;
+}
+function tintedTip(kind, level, color, v = 0, grain = null) {
+  const key = kind + level + color + ':' + v + ':' + (grain || '');
+  let c = tintCache.get(key);
+  if (c) return c;
+  c = mk(level, level);
+  const g = c.getContext('2d');
+  g.drawImage(baseTip(kind, level, kind === 'flat' || kind === 'rough' ? v : 0), 0, 0);
+  g.globalCompositeOperation = 'source-in'; g.fillStyle = color; g.fillRect(0, 0, level, level);
+  if (grain) {
+    // "Moving" grain: the texture is baked into the tip, so it travels with each stamp.
+    // Each variant uses a different offset into the texture so repeats don't line up.
+    const pat = g.createPattern(grainTiles[grain], 'repeat'), sc = Math.max(.25, level / 96);
+    if (pat.setTransform) pat.setTransform(new DOMMatrix().translate(v * 41, v * 67).scale(sc));
+    g.globalCompositeOperation = 'destination-in'; g.fillStyle = pat; g.fillRect(0, 0, level, level);
+  }
+  tintCache.set(key, c);
+  if (tintCache.size > 240) tintCache.delete(tintCache.keys().next().value);
+  return c;
+}
+// A fixed "paper tooth" texture, tiled in canvas space. Because it never moves,
+// overlapping marks fill the same pits, so light strokes look grainy and heavy ones fill in.
+function makeGrain(seed, passes, lo, hi, floor) {
+  const T = 128;
+  let a = new Float32Array(T * T), b = new Float32Array(T * T), s = seed >>> 0;
+  for (let i = 0; i < a.length; i++) { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; a[i] = s / 4294967296; }
+  for (let p = 0; p < passes; p++) {
+    for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
+      let sum = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) sum += a[((y + dy + T) % T) * T + ((x + dx + T) % T)];
+      b[y * T + x] = sum / 9;
+    }
+    [a, b] = [b, a];
+  }
+  let mn = 1, mx = 0;
+  for (const v of a) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  const c = mk(T, T), g = c.getContext('2d'), img = g.createImageData(T, T);
+  for (let i = 0; i < a.length; i++) {
+    const t = clamp(((a[i] - mn) / (mx - mn || 1) - lo) / (hi - lo), 0, 1), m = floor + (1 - floor) * t * t * (3 - 2 * t);
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = 255; img.data[i * 4 + 3] = Math.round(m * 255);
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+// Working canvases: the stroke in progress lives here until you lift the pen.
+const strokeBuf = mk(W, H), sb = strokeBuf.getContext('2d');
+const grainBuf = mk(W, H), gb = grainBuf.getContext('2d');
+const tailBuf = mk(W, H), tbx = tailBuf.getContext('2d');
+let eraseBefore = null;
+const scratch = mk(256, 256), sg = scratch.getContext('2d');
+sg.imageSmoothingQuality = 'high';
+const grainTiles = { fine: makeGrain(7, 1, .15, .7, .5), coarse: makeGrain(19, 3, .22, .78, .2) };
+const patSG = {};
+for (const k in grainTiles) patSG[k] = sg.createPattern(grainTiles[k], 'repeat');
+// Small reusable canvas the pencil re-renders its newest few segments into.
+const scratchPool = [128, 256, 512, 1024].map(n => mk(n, n));
+const pencilPats = new WeakMap();
+function pencilPattern(canvasEl, g, kind) {
+  let m = pencilPats.get(canvasEl);
+  if (!m) { m = {}; pencilPats.set(canvasEl, m); }
+  return m[kind] || (m[kind] = g.createPattern(grainTiles[kind], 'repeat'));
+}
+
+function stampPaint(g, x, y, d, alpha, tip, pattern, rot = 0, sy = 1) {
+  const half = Math.ceil(d / 2) + 1, S = half * 2;
+  if (!pattern || S > 256) {
+    g.globalAlpha = alpha;
+    if (rot || sy !== 1) { g.save(); g.translate(x, y); g.rotate(rot); if (sy !== 1) g.scale(1, sy); g.drawImage(tip, -d / 2, -d / 2, d, d); g.restore(); }
+    else g.drawImage(tip, x - d / 2, y - d / 2, d, d);
+    g.globalAlpha = 1;
+    return;
+  }
+  const sx0 = Math.floor(x) - half, sy0 = Math.floor(y) - half;
+  sg.setTransform(1, 0, 0, 1, 0, 0);
+  sg.save(); sg.beginPath(); sg.rect(0, 0, S, S); sg.clip();      // keep destination-in from touching the whole scratch
+  sg.globalCompositeOperation = 'source-over'; sg.clearRect(0, 0, S, S);
+  if (rot) { sg.save(); sg.translate(x - sx0, y - sy0); sg.rotate(rot); sg.drawImage(tip, -d / 2, -d / 2, d, d); sg.restore(); }
+  else sg.drawImage(tip, x - sx0 - d / 2, y - sy0 - d / 2, d, d);
+  sg.globalCompositeOperation = 'destination-in'; sg.fillStyle = pattern;
+  sg.setTransform(1, 0, 0, 1, -sx0, -sy0); sg.fillRect(sx0, sy0, S, S);
+  sg.restore();
+  g.globalAlpha = alpha; g.drawImage(scratch, 0, 0, S, S, sx0, sy0, S, S); g.globalAlpha = 1;
+}
+
+/* ------------------------------------------------------------------ history */
+const hist = { undo: [], redo: [], max: 60 };
+function cropCanvas(src, r) {
+  const c = mk(r.w, r.h);
+  c.getContext('2d').drawImage(src, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+  return c;
+}
+function rectFrom(x0, y0, x1, y1) {
+  const x = clamp(Math.floor(x0), 0, W), y = clamp(Math.floor(y0), 0, H);
+  const w = clamp(Math.ceil(x1), 0, W) - x, h = clamp(Math.ceil(y1), 0, H) - y;
+  return w > 0 && h > 0 ? { x, y, w, h } : null;
+}
+function pushHistory(items) {
+  if (!items.length) return;
+  hist.undo.push({ items });
+  if (hist.undo.length > hist.max) hist.undo.shift();
+  hist.redo.length = 0;
+  syncHistoryButtons();
+}
+function swapHistory(from, to) {
+  const entry = from.pop();
+  if (!entry) return;
+  const items = entry.items.map(it => {
+    const L = layerById(it.layerId), sub = it.sub || 'wet', g = subCtx(L, sub), cur = cropCanvas(subCanvas(L, sub), it.rect);
+    g.save(); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.clearRect(it.rect.x, it.rect.y, it.rect.w, it.rect.h);
+    g.drawImage(it.canvas, it.rect.x, it.rect.y);
+    g.restore();
+    return { layerId: it.layerId, sub, rect: it.rect, canvas: cur };
+  });
+  to.push({ items });
+  composite(); syncHistoryButtons();
+}
+function undo() {
+  if (inputLocked() || stroke) return;
+  if (sel) { cancelSelection(); return; }
+  swapHistory(hist.undo, hist.redo);
+}
+function redo() {
+  if (inputLocked() || stroke || sel) return;
+  swapHistory(hist.redo, hist.undo);
+}
+function syncHistoryButtons() {
+  $('#undo').disabled = !hist.undo.length && !sel;
+  $('#redo').disabled = !hist.redo.length;
+}
+function wipeCanvas() {
+  discardStroke();
+  if (sel) { sel = null; hideSel(); }
+  lasso.pts = []; lasso.on = false;
+  for (const L of layers) { L.g.clearRect(0, 0, W, H); L.dg.clearRect(0, 0, W, H); }
+  hist.undo.length = 0; hist.redo.length = 0;
+  composite(); syncHistoryButtons();
+}
+function clearAll() {
+  if (inputLocked()) return;
+  commitPending();
+  const full = { x: 0, y: 0, w: W, h: H };
+  pushHistory(layers.flatMap(L => SUBS.map(sub => ({ layerId: L.id, sub, rect: full, canvas: cropCanvas(subCanvas(L, sub), full) }))));
+  for (const L of layers) { L.g.clearRect(0, 0, W, H); L.dg.clearRect(0, 0, W, H); }
+  composite();
+}
+
+/* ------------------------------------------------------------------ drawing */
+let stroke = null, pointerId = null;
+let eraseBeforeDry = null, smudgeBefore = null, smC = null;
+const lasso = { pts: [], on: false };
+const brushKey = () => state.tool === 'eraser' ? 'eraser' : state.tool === 'blend' ? 'blend' : state.brush;
+const pressureOf = e => e.pointerType === 'pen' ? (e.pressure > 0 ? e.pressure : .5) : 1;
+const tileRect = i => { const x = (i % TX) * TILE, y = Math.floor(i / TX) * TILE; return { x, y, w: Math.min(TILE, W - x), h: Math.min(TILE, H - y) }; };
+const isPaintTool = () => state.tool === 'brush' || state.tool === 'eraser' || state.tool === 'blend';
+
+function toCanvas(e) {
+  const r = canvas.getBoundingClientRect();
+  let fx = (e.clientX - r.left) / (r.width || 1);
+  const fy = (e.clientY - r.top) / (r.height || 1);
+  if (state.mirror) fx = 1 - fx;
+  // Pen tilt: tilt 0 = upright, 1 = lying flat. Azimuth = the direction the pen leans, as a unit
+  // vector in canvas space. Uses altitude/azimuth where the browser has them, else tiltX/tiltY.
+  const pen = e.pointerType === 'pen';
+  let tilt = 0, az = 0;
+  if (pen) {
+    if (typeof e.altitudeAngle === 'number' && typeof e.azimuthAngle === 'number') {
+      tilt = clamp(1 - e.altitudeAngle / (Math.PI / 2), 0, 1); az = e.azimuthAngle;
+    } else if (e.tiltX || e.tiltY) {
+      const tx = Math.tan((e.tiltX || 0) * Math.PI / 180), ty = Math.tan((e.tiltY || 0) * Math.PI / 180);
+      tilt = clamp(1 - Math.atan(1 / Math.hypot(tx, ty)) / (Math.PI / 2), 0, 1); az = Math.atan2(ty, tx);
+    }
+  }
+  let ax = Math.cos(az), ay = Math.sin(az);
+  if (state.mirror) ax = -ax;
+  const tw = pen && e.twist ? (e.twist * Math.PI / 180) * (state.mirror ? -1 : 1) : 0;
+  return { x: fx * W, y: fy * H, p: 1, k: 1, t: e.timeStamp || performance.now(), pen, tilt, ax, ay, tw };
+}
+// Interpolates every per-point value (position, pressure, taper, tilt, pen angle, barrel rotation).
+function mixPt(a, b, t) {
+  const ax = (a.ax ?? 1) + ((b.ax ?? 1) - (a.ax ?? 1)) * t, ay = (a.ay ?? 0) + ((b.ay ?? 0) - (a.ay ?? 0)) * t, n = Math.hypot(ax, ay) || 1;
+  const dtw = (((b.tw || 0) - (a.tw || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, p: a.p + (b.p - a.p) * t, k: (a.k ?? 1) + ((b.k ?? 1) - (a.k ?? 1)) * t,
+           tilt: (a.tilt || 0) + ((b.tilt || 0) - (a.tilt || 0)) * t, ax: ax / n, ay: ay / n, tw: (a.tw || 0) + dtw * t,
+           t: a.t + (b.t - a.t) * t, pen: b.pen };
+}
+function inputLocked() {
+  return session.phase === 'paused' || session.phase === 'done' || !!document.querySelector('dialog[open]');
+}
+function copyInto(c, src) {
+  c = c || mk(W, H);
+  const g = c.getContext('2d'); g.clearRect(0, 0, W, H); g.drawImage(src, 0, 0);
+  return c;
+}
+
+// Every mark records which 128px tiles it touched, so undo only stores those pixels.
+function touch(x0, y0, x1, y1) {
+  const s = stroke;
+  s.dirty = s.dirty ? { x0: Math.min(s.dirty.x0, x0), y0: Math.min(s.dirty.y0, y0), x1: Math.max(s.dirty.x1, x1), y1: Math.max(s.dirty.y1, y1) } : { x0, y0, x1, y1 };
+  const a = clamp(Math.floor(x0 / TILE), 0, TX - 1), b = clamp(Math.floor(x1 / TILE), 0, TX - 1);
+  const c = clamp(Math.floor(y0 / TILE), 0, TY - 1), d = clamp(Math.floor(y1 / TILE), 0, TY - 1);
+  for (let ty = c; ty <= d; ty++) for (let tx = a; tx <= b; tx++) s.tiles.add(ty * TX + tx);
+}
+
+/* --- path engine (ink, eraser) ---
+   Ink keeps its segments and, for each new one, re-renders only the few that sit nearby into a
+   small canvas and swaps that patch into the stroke buffer. That keeps joins exact, and lets the
+   last stretch be re-rendered thinner when the pen lifts. */
+function drawSeg(g, o) {
+  if (o.dot) { g.beginPath(); g.arc(o.x, o.y, o.w / 2, 0, Math.PI * 2); g.fill(); }
+  else { g.lineWidth = o.w; g.beginPath(); g.moveTo(o.a.x, o.a.y); g.quadraticCurveTo(o.c.x, o.c.y, o.b.x, o.b.y); g.stroke(); }
+}
+function patchRect(R) {
+  const s = stroke;
+  if (!R) return;
+  const near = s.segs.filter(o => o.x1 >= R.x && o.x0 <= R.x + R.w && o.y1 >= R.y && o.y0 <= R.y + R.h);
+  const E = scratchPool.find(c => c.width >= R.w && c.height >= R.h) || mk(R.w, R.h), eg = E.getContext('2d');
+  eg.setTransform(1, 0, 0, 1, 0, 0); eg.save();
+  eg.beginPath(); eg.rect(0, 0, R.w, R.h); eg.clip();
+  eg.clearRect(0, 0, R.w, R.h);
+  eg.setTransform(1, 0, 0, 1, -R.x, -R.y);
+  eg.lineCap = eg.lineJoin = 'round'; eg.strokeStyle = eg.fillStyle = s.color;
+  for (const o of near) drawSeg(eg, o);
+  if (s.cfg.grain) {
+    eg.globalCompositeOperation = 'destination-in'; eg.fillStyle = pencilPattern(E, eg, s.cfg.grain);
+    eg.fillRect(R.x, R.y, R.w, R.h);
+  }
+  eg.restore();
+  gb.clearRect(R.x, R.y, R.w, R.h);
+  gb.drawImage(E, 0, 0, R.w, R.h, R.x, R.y, R.w, R.h);
+}
+function segBounds(o) {
+  const r = o.w / 2 + 2;
+  if (o.dot) { o.x0 = o.x - r; o.y0 = o.y - r; o.x1 = o.x + r; o.y1 = o.y + r; }
+  else { o.x0 = Math.min(o.a.x, o.c.x, o.b.x) - r; o.y0 = Math.min(o.a.y, o.c.y, o.b.y) - r; o.x1 = Math.max(o.a.x, o.c.x, o.b.x) + r; o.y1 = Math.max(o.a.y, o.c.y, o.b.y) + r; }
+}
+function addSeg(o) {
+  const s = stroke;
+  segBounds(o);
+  touch(o.x0, o.y0, o.x1, o.y1);
+  if (s.engine === 'erase') { drawSeg(s.L.g, o); drawSeg(s.L.dg, o); }
+  else { s.segs.push(o); patchRect(rectFrom(o.x0, o.y0, o.x1, o.y1)); }
+}
+
+/* --- stroke lifecycle --- */
+function beginStroke(pt, opts = {}) {
+  const key = opts.key || brushKey(), cfg = feel(key), L = opts.L || activeLayer(), preview = !!opts.preview;
+  if (!preview && !L.visible) { L.visible = true; renderLayers(); }
+  const opacity = clamp((state.opacity[key] ?? OPACITY_DEFAULT[key]) / 100, .01, 1);
+  const s = stroke = {
+    key, cfg, L, engine: cfg.engine, dry: !!cfg.dry, size: state.sizes[key], color: state.color,
+    alpha: cfg.engine === 'erase' ? 1 : cfg.alpha * opacity, opacity,
+    paper: cfg.engine === 'stamp' && !!cfg.grain && cfg.grainMode === 'paper', preview,
+    sbDirty: null, segs: [], tail: cfg.engine === 'stamp' ? [] : null, tailRect: null, tailLen: 0,
+    sim: .8, lt: pt.t, dist: 0, sdist: 0, cur: 0, dir: 0, firstDot: null,
+    tl: pt.tilt || 0, sax: pt.ax ?? 1, say: pt.ay ?? 0, twx: Math.cos(pt.tw || 0), twy: Math.sin(pt.tw || 0),
+    prev: pt, mid: pt, pp: pt.p, last: pt, carry: 0, dirty: null, tiles: new Set()
+  };
+  s.grain = cfg.engine === 'path' || s.paper;            // strokes that read from the grain buffer
+  if (!pt.pen && cfg.speedK) pt.p = s.sim;
+  pt.p = cfg.lut(pt.p); s.pp = pt.p;
+  pt.k = taperK(0);
+  if (s.tail) s.tailLen = Math.max((cfg.taperOut || 0) * SC, cfg.dia(s.size, 1) * SC * 1.5);
+  if (s.engine === 'erase') {
+    eraseBefore = copyInto(eraseBefore, L.canvas);
+    eraseBeforeDry = copyInto(eraseBeforeDry, L.dry);
+    for (const g of [L.g, L.dg]) { g.globalCompositeOperation = 'destination-out'; g.strokeStyle = g.fillStyle = '#000'; g.lineCap = g.lineJoin = 'round'; }
+  } else if (s.engine === 'smudge') {
+    smudgeBegin(pt);
+    if (!preview) { buildStrokeCaches(L); queueComposite(); }
+    return;
+  } else {
+    sb.lineCap = sb.lineJoin = 'round'; sb.strokeStyle = sb.fillStyle = s.color;
+  }
+  dot(pt);
+  if (!preview) { buildStrokeCaches(L); queueComposite(); }
+}
+// Size multiplier for the taper-in at a given distance along the stroke.
+function taperK(dist) {
+  const cfg = stroke.cfg;
+  return cfg.taperIn ? cfg.minK + (1 - cfg.minK) * ease(dist / (cfg.taperIn * SC)) : 1;
+}
+function dot(pt) {
+  const s = stroke;
+  if (s.engine === 'stamp') { s.cur = 0; stampAt(pt); return; }
+  const o = { dot: true, x: pt.x, y: pt.y, w: Math.max(1, s.cfg.dia(s.size, pt.p) * SC * pt.k * (1 + s.cfg.tiltSize * (pt.tilt || 0))) };
+  s.firstDot = o;
+  addSeg(o);
+}
+// One smoothed piece of the path: a quadratic curve from midpoint a to midpoint b, steered by raw point c.
+function curve(a, c, b) {
+  const s = stroke;
+  if (s.engine === 'stamp' || s.engine === 'smudge') { stampCurve(a, c, b); return; }
+  addSeg({ a, c, b, w: Math.max(.8, s.cfg.dia(s.size, c.p) * SC * c.k * (1 + s.cfg.tiltSize * (c.tilt || 0))) });
+}
+function stampCurve(a, c, b) {
+  const len = Math.hypot(c.x - a.x, c.y - a.y) + Math.hypot(b.x - c.x, b.y - c.y), n = Math.max(1, Math.ceil(len / 3));
+  for (let i = 1; i <= n; i++) {
+    const t = i / n, u = 1 - t, q = mixPt(a, b, t);
+    q.x = u * u * a.x + 2 * u * t * c.x + t * t * b.x; q.y = u * u * a.y + 2 * u * t * c.y + t * t * b.y;
+    strokeTo(q);
+  }
+}
+// Walks a straight piece of path, emitting a dab every `step` px and remembering the leftover.
+function strokeTo(pt) {
+  const s = stroke, cfg = s.cfg;
+  const dx = pt.x - s.last.x, dy = pt.y - s.last.y, L = Math.hypot(dx, dy);
+  if (L < .01) return;
+  s.dir = Math.atan2(dy, dx);
+  const step = Math.max(.6, cfg.dia(s.size, pt.p) * SC * cfg.spacing);
+  let t = step - s.carry, guard = 0;
+  while (t <= L && guard++ < 2000) {
+    const q = mixPt(s.last, pt, t / L);
+    s.cur = s.sdist + t;
+    if (s.engine === 'smudge') smudgeDab(q.x, q.y, q.p);
+    else stampAt(q);
+    t += step;
+  }
+  s.carry = L - (t - step);
+  s.sdist += L;
+  s.last = pt;
+}
+
+/* --- stamp engine (pencil, charcoal, soft) ---
+   Every stamp is recorded with its own fixed jitter. Stamps in the last `tailLen` px stay in a
+   tail buffer that is redrawn each frame; when the pen lifts they are re-painted with a gentle
+   fade in opacity and only a mild shrink, so strokes end softly instead of in a thin wisp. */
+function stampAt(q) {
+  const s = stroke, cfg = s.cfg, k = q.k ?? 1, tilt = q.tilt || 0;
+  let d = Math.max(1, cfg.dia(s.size, q.p) * SC * k * (1 + cfg.tiltSize * tilt));
+  let flow = cfg.flow(q.p) * (1 - cfg.tiltFlow * tilt);
+  const tin = cfg.minK < 1 ? clamp((k - cfg.minK) / (1 - cfg.minK), 0, 1) : 1;
+  flow *= .35 + .65 * tin;                                   // starts fade in as well as grow
+  if (cfg.sizeJit) d *= 1 - cfg.sizeJit * Math.random();
+  if (cfg.flowJit) flow *= 1 - cfg.flowJit * Math.random();
+  let x = q.x, y = q.y;
+  if (cfg.scatter) { const ang = Math.random() * 6.283, off = Math.random() * d * cfg.scatter; x += Math.cos(ang) * off; y += Math.sin(ang) * off; }
+  let rot;
+  switch (cfg.angleMode) {
+    case 'direction': rot = s.dir + cfg.angle; break;
+    case 'tilt': rot = Math.atan2(q.ay ?? 0, q.ax ?? 1) + cfg.angle; break;
+    case 'twist': rot = (q.tw || 0) + cfg.angle; break;
+    case 'random': rot = Math.random() * 6.283; break;
+    default: rot = cfg.angle;
+  }
+  if (cfg.angleJit) rot += (Math.random() * 2 - 1) * cfg.angleJit;
+  const sy = Math.max(.15, 1 - cfg.tiltShape * tilt);       // tilting flattens the tip along its angle
+  const level = LEVELS.find(l => l >= d) || 256;
+  const moving = !!cfg.grain && cfg.grainMode === 'moving';
+  const v = cfg.kind === 'flat' || cfg.kind === 'rough' || moving ? Math.floor(Math.random() * TIP_VARIANTS) : 0;
+  const rec = { x, y, d, flow, sy, rot, dist: s.cur, tip: tintedTip(cfg.kind, level, s.color, v, moving ? cfg.grain : null) };
+  const r = d / 2 + 3;
+  touch(x - r, y - r, x + r, y + r);
+  if (s.tail) s.tail.push(rec); else paintRec(sb, rec, 1, 1);
+}
+function paintRec(g, r, kf, ff) {
+  stampPaint(g, r.x, r.y, r.d * kf, r.flow * ff, r.tip, null, r.rot, r.sy);
+  if (g === sb && stroke.paper) {
+    const h = r.d * kf / 2 + 3, s = stroke, D = s.sbDirty;
+    s.sbDirty = D ? { x0: Math.min(D.x0, r.x - h), y0: Math.min(D.y0, r.y - h), x1: Math.max(D.x1, r.x + h), y1: Math.max(D.y1, r.y + h) }
+                  : { x0: r.x - h, y0: r.y - h, x1: r.x + h, y1: r.y + h };
+  }
+}
+// Paper tooth for stamp strokes: copy the changed part of the plain stroke into the grain buffer and
+// mask it with the fixed paper texture. Clipped, because destination-in would otherwise clear the rest.
+function maskWithGrain(g, canvasEl, R, kind) {
+  g.save(); g.beginPath(); g.rect(R.x, R.y, R.w, R.h); g.clip();
+  g.globalCompositeOperation = 'destination-in'; g.fillStyle = pencilPattern(canvasEl, g, kind);
+  g.fillRect(R.x, R.y, R.w, R.h);
+  g.restore();
+}
+function regrain() {
+  const s = stroke;
+  if (!s || !s.paper || !s.sbDirty) return;
+  const D = s.sbDirty, R = rectFrom(D.x0, D.y0, D.x1, D.y1);
+  s.sbDirty = null;
+  if (!R) return;
+  gb.clearRect(R.x, R.y, R.w, R.h);
+  gb.drawImage(strokeBuf, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
+  maskWithGrain(gb, grainBuf, R, s.cfg.grain);
+}
+function flushTail() {
+  const s = stroke;
+  if (!s || !s.tail) return;
+  const cut = s.sdist - s.tailLen;
+  let i = 0;
+  while (i < s.tail.length && s.tail[i].dist < cut) paintRec(sb, s.tail[i++], 1, 1);
+  if (i) s.tail.splice(0, i);
+  if (s.tailRect) tbx.clearRect(s.tailRect.x, s.tailRect.y, s.tailRect.w, s.tailRect.h);
+  s.tailRect = null;
+  if (!s.tail.length) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const r of s.tail) {
+    const h = r.d / 2 + 3;
+    x0 = Math.min(x0, r.x - h); y0 = Math.min(y0, r.y - h); x1 = Math.max(x1, r.x + h); y1 = Math.max(y1, r.y + h);
+    paintRec(tbx, r, 1, 1);
+  }
+  s.tailRect = rectFrom(x0, y0, x1, y1);
+  if (s.tailRect && s.paper) maskWithGrain(tbx, tailBuf, s.tailRect, s.cfg.grain);
+}
+
+/* --- smudge engine (blending nub) ---
+   Classic smudge: the nub carries a small patch of pigment. At each dab it mixes in some of what
+   is under it (carry = carry·(1−pickup) + under·pickup), then lays that mix back down through a
+   soft round mask: dry = dry·(1−m) + carry·m. All of it is canvas compositing ('lighter' adds
+   premultiplied colour, 'destination-out' removes by the mask), so it runs on the GPU.
+   It only reads and writes the layer's dry-media sheet, so ink and soft-brush marks never move. */
+function smudgeBegin(pt) {
+  const s = stroke, L = s.L;
+  smudgeBefore = copyInto(smudgeBefore, L.dry);
+  const S = Math.min(256, Math.ceil(s.cfg.dia(s.size, 1) * SC) + 4);
+  if (!smC || smC.S !== S) {
+    const carry = mk(S, S), tmp = mk(S, S), mask = mk(S, S);
+    smC = { S, carry, cg: carry.getContext('2d'), tmp, tg: tmp.getContext('2d'), mask, mg: mask.getContext('2d') };
+  }
+  const x0 = Math.round(pt.x - S / 2), y0 = Math.round(pt.y - S / 2);
+  smC.cg.globalCompositeOperation = 'source-over'; smC.cg.globalAlpha = 1;
+  smC.cg.clearRect(0, 0, S, S);
+  smC.cg.drawImage(L.dry, x0, y0, S, S, 0, 0, S, S);
+}
+function smudgeDab(x, y, p) {
+  const s = stroke, L = s.L, c = smC, S = c.S, cfg = s.cfg;
+  const d = clamp(cfg.dia(s.size, p) * SC, 2, S - 4);
+  const x0 = Math.round(x - S / 2), y0 = Math.round(y - S / 2), t = cfg.pickup;
+  const strength = clamp(s.opacity * (.35 + .65 * p), 0, 1);
+  const tg = c.tg, cg = c.cg, mg = c.mg;
+  // mix = carry·(1−t) + under·t
+  tg.globalCompositeOperation = 'source-over'; tg.globalAlpha = 1; tg.clearRect(0, 0, S, S);
+  tg.globalAlpha = 1 - t; tg.drawImage(c.carry, 0, 0);
+  tg.globalCompositeOperation = 'lighter'; tg.globalAlpha = t; tg.drawImage(L.dry, x0, y0, S, S, 0, 0, S, S);
+  tg.globalCompositeOperation = 'source-over'; tg.globalAlpha = 1;
+  // the nub now carries the mix
+  cg.clearRect(0, 0, S, S); cg.drawImage(c.tmp, 0, 0);
+  // soft round mask, scaled by strength
+  mg.globalAlpha = 1; mg.clearRect(0, 0, S, S);
+  mg.globalAlpha = strength; mg.drawImage(baseTip('soft', LEVELS.find(l => l >= d) || 256), (S - d) / 2, (S - d) / 2, d, d);
+  mg.globalAlpha = 1;
+  tg.globalCompositeOperation = 'destination-in'; tg.drawImage(c.mask, 0, 0);
+  tg.globalCompositeOperation = 'source-over';
+  // dry = dry·(1−m) + mix·m
+  const g = L.dg;
+  g.save(); g.globalAlpha = 1;
+  g.globalCompositeOperation = 'destination-out'; g.drawImage(c.mask, x0, y0);
+  g.globalCompositeOperation = 'lighter'; g.drawImage(c.tmp, x0, y0);
+  g.restore();
+  touch(x0, y0, x0 + S, y0 + S);
+}
+
+// The line is drawn to the midpoint between the last two input points, so it stays within
+// half a step of the pointer instead of trailing behind it.
+function feedStroke(raw) {
+  const s = stroke, cfg = s.cfg;
+  const d = Math.hypot(raw.x - s.prev.x, raw.y - s.prev.y);
+  if (d < .5 * SC) return;
+  if (!raw.pen && cfg.speedK) {
+    // No pressure from a mouse or finger: fast motion reads as a lighter touch.
+    const dt = clamp(raw.t - s.lt, 1, 100), v = d / SC / dt;          // layout px per ms
+    const target = clamp(1.05 - v * cfg.speedK, cfg.speedMin, 1);
+    s.sim += (target - s.sim) * .3;
+    raw.p = s.sim;
+  }
+  s.lt = raw.t;
+  raw.p = cfg.lut(raw.p);                                   // the brush's pressure curve
+  s.pp += (raw.p - s.pp) * .5; raw.p = s.pp;
+  if (raw.pen) {
+    // Tilt and pen angle jitter a little sample to sample; smooth them (angles as vectors).
+    s.tl += ((raw.tilt || 0) - s.tl) * .35; raw.tilt = s.tl;
+    s.sax += ((raw.ax ?? 1) - s.sax) * .35; s.say += ((raw.ay ?? 0) - s.say) * .35;
+    const n = Math.hypot(s.sax, s.say) || 1; raw.ax = s.sax / n; raw.ay = s.say / n;
+    s.twx += (Math.cos(raw.tw || 0) - s.twx) * .35; s.twy += (Math.sin(raw.tw || 0) - s.twy) * .35;
+    raw.tw = Math.atan2(s.twy, s.twx);
+  }
+  s.dist += d;
+  raw.k = taperK(s.dist);
+  const m = mixPt(s.prev, raw, .5);
+  curve(s.mid, s.prev, m);
+  s.mid = m; s.prev = raw;
+}
+// Called once at pen-up. A tap (barely moved) gets a full-size mark; real strokes ease out.
+function finishShape(s) {
+  const cfg = s.cfg, tap = s.dist < 2 * SC;
+  if (s.engine === 'stamp') {
+    if (tap) {
+      for (const r of s.tail) paintRec(sb, r, 1, 1);
+      s.tail.length = 0;
+      const keep = s.tail; s.tail = null; s.cur = 0;
+      for (let i = 0, n = Math.ceil(.5 / cfg.spacing); i < n; i++) stampAt({ ...s.prev, k: 1 });
+      s.tail = keep;
+    } else {
+      const tl = Math.max(1, Math.min(s.tailLen, s.sdist * .5));
+      for (const r of s.tail) {
+        const e = ease((s.sdist - r.dist) / tl);
+        paintRec(sb, r, cfg.minOut + (1 - cfg.minOut) * e, .12 + .88 * e);
+      }
+      s.tail.length = 0;
+    }
+    if (s.tailRect) { tbx.clearRect(s.tailRect.x, s.tailRect.y, s.tailRect.w, s.tailRect.h); s.tailRect = null; }
+    return;
+  }
+  if (s.engine !== 'path') return;
+  if (tap) {
+    if (s.firstDot) {
+      const o = s.firstDot;
+      o.w = Math.max(1, cfg.dia(s.size, s.prev.p) * SC); segBounds(o); touch(o.x0, o.y0, o.x1, o.y1);
+      patchRect(rectFrom(o.x0, o.y0, o.x1, o.y1));
+    }
+    return;
+  }
+  if (!cfg.taperOut || s.segs.length < 2) return;
+  // Ease the width down over a stretch proportional to the line's own width, to about 40%:
+  // long enough to read as a lifted brush, short enough not to leave a thin trailing wisp.
+  const wl = s.segs[s.segs.length - 1].w;
+  const len = Math.min(Math.max(cfg.taperOut * SC, wl * 2.5), s.dist * .35);
+  let acc = 0, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = s.segs.length - 1; i >= 0 && acc < len; i--) {
+    const o = s.segs[i];
+    if (o.dot) break;
+    const segLen = Math.hypot(o.c.x - o.a.x, o.c.y - o.a.y) + Math.hypot(o.b.x - o.c.x, o.b.y - o.c.y);
+    const f = cfg.minOut + (1 - cfg.minOut) * ease((acc + segLen / 2) / len);
+    acc += segLen;
+    x0 = Math.min(x0, o.x0); y0 = Math.min(y0, o.y0); x1 = Math.max(x1, o.x1); y1 = Math.max(y1, o.y1);
+    o.w = Math.max(.8, o.w * f); segBounds(o);
+  }
+  if (x0 < x1) patchRect(rectFrom(x0, y0, x1, y1));
+}
+function discardStroke() {
+  if (stroke && stroke.engine === 'erase') { stroke.L.g.globalCompositeOperation = 'source-over'; stroke.L.dg.globalCompositeOperation = 'source-over'; }
+  stroke = null; cacheFor = null;
+  sb.clearRect(0, 0, W, H); gb.clearRect(0, 0, W, H); tbx.clearRect(0, 0, W, H);
+}
+function endStroke() {
+  const s = stroke;
+  if (!s) return;
+  if (s.mid !== s.prev) curve(s.mid, mixPt(s.mid, s.prev, .5), s.prev);
+  finishShape(s);
+  regrain();
+  cacheFor = null;
+  const r = s.dirty && rectFrom(s.dirty.x0, s.dirty.y0, s.dirty.x1, s.dirty.y1);
+  if (r) {
+    const items = [];
+    const crop = (sub, src) => { if (s.preview) return; for (const i of s.tiles) { const t = tileRect(i); items.push({ layerId: s.L.id, sub, rect: t, canvas: cropCanvas(src, t) }); } };
+    if (s.engine === 'erase') { crop('wet', eraseBefore); crop('dry', eraseBeforeDry); }
+    else if (s.engine === 'smudge') crop('dry', smudgeBefore);
+    else {
+      const sub = s.dry ? 'dry' : 'wet', g = subCtx(s.L, sub);
+      crop(sub, subCanvas(s.L, sub));                       // snapshot before the stroke lands
+      g.save(); g.globalCompositeOperation = 'source-over'; g.globalAlpha = s.alpha;
+      g.drawImage(s.grain ? grainBuf : strokeBuf, r.x, r.y, r.w, r.h, r.x, r.y, r.w, r.h);
+      g.restore();
+    }
+    if (!s.preview) pushHistory(items);
+  }
+  if (s.engine === 'erase') { s.L.g.globalCompositeOperation = 'source-over'; s.L.dg.globalCompositeOperation = 'source-over'; }
+  sb.clearRect(0, 0, W, H); gb.clearRect(0, 0, W, H); tbx.clearRect(0, 0, W, H);
+  stroke = null;
+  if (!s.preview) { session.strokes++; queueComposite(); }
+}
+function commitPending() {
+  if (stroke) endStroke();
+  pointerId = null;
+  if (sel) applySelection();
+  lasso.pts = []; lasso.on = false;
+}
+function pickColor(pt) {
+  composite();
+  const x = clamp(Math.round(pt.x), 0, W - 1), y = clamp(Math.round(pt.y), 0, H - 1);
+  const d = ctx.getImageData(x, y, 1, 1).data;
+  setColor('#' + [d[0], d[1], d[2]].map(n => pad2(n.toString(16))).join(''));
+  if (state.tool === 'dropper') setTool('brush');
+}
+
+function onDown(e) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  if (inputLocked() || pointerId !== null) return;
+  e.preventDefault();
+  const pt = toCanvas(e); pt.p = pressureOf(e);
+  if (state.tool === 'dropper' || e.altKey) { pickColor(pt); return; }
+  if (sel) { applySelection(); return; }
+  if (session.phase === 'ready') startClock();
+  pointerId = e.pointerId;
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  if (state.tool === 'lasso') { lasso.pts = [pt]; lasso.on = true; return; }
+  beginStroke(pt);
+}
+function onMove(e) {
+  const raw = toCanvas(e);
+  updateCursor(raw, e);
+  if (pointerId !== e.pointerId) return;
+  if (lasso.on) { lasso.pts.push(raw); queueComposite(); return; }
+  if (!stroke) return;
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+  for (const ev of (evs.length ? evs : [e])) { const p = toCanvas(ev); p.p = pressureOf(ev); p.pen = (ev.pointerType || e.pointerType) === 'pen'; feedStroke(p); }
+  queueComposite();
+}
+function onUp(e) {
+  if (pointerId !== e.pointerId) return;
+  try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+  pointerId = null;
+  if (lasso.on) { lasso.on = false; const pts = lasso.pts; lasso.pts = []; makeSelection(pts); queueComposite(); return; }
+  endStroke();
+}
+function updateCursor(pt, e) {
+  if (!isPaintTool() || sel || e.pointerType === 'touch' || inputLocked()) { cursorEl.hidden = true; return; }
+  const key = brushKey(), r = canvas.getBoundingClientRect();
+  const px = Math.max(8, feel(key).dia(state.sizes[key], 1) * SC * r.width / W);
+  cursorEl.style.width = cursorEl.style.height = px + 'px';
+  cursorEl.style.left = (pt.x / W * 100) + '%'; cursorEl.style.top = (pt.y / H * 100) + '%';
+  cursorEl.hidden = false;
+}
+canvas.addEventListener('pointerdown', onDown);
+canvas.addEventListener('pointermove', onMove);
+canvas.addEventListener('pointerup', onUp);
+canvas.addEventListener('pointercancel', onUp);
+canvas.addEventListener('pointerleave', () => { cursorEl.hidden = true; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---------------------------------------------------------- lasso + transform */
+let sel = null, selDrag = null;
+// The lasso lifts pixels from both sheets of the layer (dry media and the rest) and moves them together.
+function makeSelection(pts) {
+  if (pts.length < 3) return;
+  let x0 = W, y0 = H, x1 = 0, y1 = 0;
+  for (const p of pts) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+  const box = rectFrom(x0 - 1, y0 - 1, x1 + 1, y1 + 1);
+  if (!box || box.w < 4 || box.h < 4) return;
+  const L = activeLayer();
+  const path = new Path2D();
+  pts.forEach((p, i) => i ? path.lineTo(p.x, p.y) : path.moveTo(p.x, p.y)); path.closePath();
+  let any = false;
+  const parts = SUBS.map(sub => {
+    const src = subCanvas(L, sub);
+    const fc = mk(box.w, box.h), fg = fc.getContext('2d');
+    fg.save(); fg.translate(-box.x, -box.y); fg.clip(path); fg.drawImage(src, 0, 0); fg.restore();
+    if (!any) { const px = fg.getImageData(0, 0, box.w, box.h).data; for (let i = 3; i < px.length; i += 4) if (px[i] > 0) { any = true; break; } }
+    return { sub, canvas: fc, snap: null };
+  });
+  if (!any) { toast('Nothing inside the lasso on this layer.'); return; }
+  for (const part of parts) {
+    const src = subCanvas(L, part.sub), g = subCtx(L, part.sub);
+    part.snap = mk(W, H); part.snap.getContext('2d').drawImage(src, 0, 0);
+    g.save(); g.globalCompositeOperation = 'destination-out'; g.fill(path); g.restore();
+  }
+  sel = { parts, w: box.w, h: box.h, cx: box.x + box.w / 2, cy: box.y + box.h / 2, s: 1, rot: 0, layerId: L.id, box };
+  showSel(); syncHistoryButtons();
+}
+function selBounds() {
+  const c = Math.cos(sel.rot), s = Math.sin(sel.rot), hw = sel.w * sel.s / 2, hh = sel.h * sel.s / 2;
+  const ex = Math.abs(c) * hw + Math.abs(s) * hh, ey = Math.abs(s) * hw + Math.abs(c) * hh;
+  return { x0: sel.cx - ex, y0: sel.cy - ey, x1: sel.cx + ex, y1: sel.cy + ey };
+}
+function applySelection() {
+  if (!sel) return;
+  const L = layerById(sel.layerId), b = selBounds(), o = sel.box;
+  const r = rectFrom(Math.min(b.x0, o.x) - 2, Math.min(b.y0, o.y) - 2, Math.max(b.x1, o.x + o.w) + 2, Math.max(b.y1, o.y + o.h) + 2);
+  const items = [];
+  for (const part of sel.parts) {
+    const g = subCtx(L, part.sub);
+    g.save(); g.translate(sel.cx, sel.cy); g.rotate(sel.rot); g.scale(sel.s, sel.s);
+    g.drawImage(part.canvas, -sel.w / 2, -sel.h / 2); g.restore();
+    if (r) items.push({ layerId: L.id, sub: part.sub, rect: r, canvas: cropCanvas(part.snap, r) });
+  }
+  pushHistory(items);
+  sel = null; selDrag = null; hideSel(); session.strokes++; composite(); syncHistoryButtons();
+}
+function cancelSelection() {
+  if (!sel) return;
+  const L = layerById(sel.layerId), o = sel.box;
+  for (const part of sel.parts) {
+    const g = subCtx(L, part.sub);
+    g.save(); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.clearRect(o.x, o.y, o.w, o.h); g.drawImage(part.snap, o.x, o.y, o.w, o.h, o.x, o.y, o.w, o.h);
+    g.restore();
+  }
+  sel = null; selDrag = null; hideSel(); composite(); syncHistoryButtons();
+}
+function showSel() { $('#xform').hidden = false; selEl.hidden = false; cursorEl.hidden = true; positionSel(); composite(); }
+function hideSel() { $('#xform').hidden = true; selEl.hidden = true; }
+function positionSel() {
+  if (!sel) return;
+  const bw = sel.w * sel.s, bh = sel.h * sel.s;
+  selEl.style.left = ((sel.cx - bw / 2) / W * 100) + '%'; selEl.style.top = ((sel.cy - bh / 2) / H * 100) + '%';
+  selEl.style.width = (bw / W * 100) + '%'; selEl.style.height = (bh / H * 100) + '%';
+  selEl.style.transform = `rotate(${sel.rot}rad)`;
+}
+selEl.addEventListener('pointerdown', e => {
+  if (!sel) return;
+  e.preventDefault(); e.stopPropagation();
+  const h = e.target.closest('[data-h]'), pt = toCanvas(e);
+  selDrag = {
+    mode: h ? (h.dataset.h === 'rot' ? 'rotate' : 'scale') : 'move',
+    pt, s0: sel.s, rot0: sel.rot, cx0: sel.cx, cy0: sel.cy,
+    ang0: Math.atan2(pt.y - sel.cy, pt.x - sel.cx), dist0: Math.hypot(pt.x - sel.cx, pt.y - sel.cy) || 1
+  };
+  try { selEl.setPointerCapture(e.pointerId); } catch (err) {}
+});
+selEl.addEventListener('pointermove', e => {
+  if (!selDrag || !sel) return;
+  const pt = toCanvas(e), d = selDrag;
+  if (d.mode === 'move') { sel.cx = d.cx0 + pt.x - d.pt.x; sel.cy = d.cy0 + pt.y - d.pt.y; }
+  else if (d.mode === 'scale') sel.s = clamp(d.s0 * Math.hypot(pt.x - sel.cx, pt.y - sel.cy) / d.dist0, .05, 8);
+  else sel.rot = d.rot0 + Math.atan2(pt.y - sel.cy, pt.x - sel.cx) - d.ang0;
+  positionSel(); queueComposite();
+});
+const endSelDrag = e => { selDrag = null; try { selEl.releasePointerCapture(e.pointerId); } catch (err) {} };
+selEl.addEventListener('pointerup', endSelDrag);
+selEl.addEventListener('pointercancel', endSelDrag);
+$('#sel-apply').onclick = applySelection;
+$('#sel-cancel').onclick = cancelSelection;
+
+/* ------------------------------------------------------------------ tool UI */
+const SWATCHES = [['Black', '#111111'], ['Graphite', '#4b4f56'], ['Sepia', '#6a4a36'], ['Sanguine', '#9c4030'],
+                  ['Ochre', '#b98a2c'], ['Slate', '#3d5a80'], ['Chalk', '#ffffff'], ['Silver', '#c9ccd1']];
+function setTool(t) {
+  if (sel) applySelection();
+  state.tool = t; syncToolUI();
+}
+function syncToolUI() {
+  $$('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === state.tool)));
+  $$('[data-brush]').forEach(b => b.setAttribute('aria-pressed', String(state.tool === 'brush' && b.dataset.brush === state.brush)));
+  $('#brush-types').classList.toggle('dim', state.tool !== 'brush');
+  const key = brushKey(), cfg = BRUSHES[key], size = $('#size'), on = isPaintTool();
+  size.disabled = !on; size.min = cfg.min; size.max = cfg.max; size.value = state.sizes[key];
+  $('#size-val').textContent = state.sizes[key];
+  $('#brush-edit').disabled = !on || key === 'eraser';
+  const op = $('#opacity'), opOn = on && key !== 'eraser';
+  op.disabled = !opOn; op.value = state.opacity[key];
+  $('#opacity-val').textContent = opOn ? state.opacity[key] + '%' : '';
+  $('#opacity-label').textContent = key === 'blend' ? 'Strength' : 'Opacity';
+  canvas.className = on ? 'brush-cursor' : 'cross';
+  if (!on) cursorEl.hidden = true;
+}
+function setOpacity(v) {
+  const key = brushKey();
+  state.opacity[key] = clamp(Math.round(v), 5, 100);
+  syncToolUI();
+}
+function setSize(v) {
+  const key = brushKey();
+  state.sizes[key] = clamp(Math.round(v), BRUSHES[key].min, BRUSHES[key].max);
+  syncToolUI();
+}
+function setColor(hex) {
+  state.color = hex;
+  $$('.swatch').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.c.toLowerCase() === hex.toLowerCase())));
+  $('#color-custom').value = hex;
+}
+function setLayer(id) {
+  if (sel) applySelection();
+  state.layer = id; renderLayers();
+}
+const EYE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg>';
+function renderLayers() {
+  const box = $('#layers');
+  box.innerHTML = '';
+  [...layers].reverse().forEach((L, i) => {
+    const row = document.createElement('div');
+    row.className = 'layer' + (L.id === state.layer ? ' on' : '');
+    const eye = document.createElement('button');
+    eye.className = 'eye'; eye.type = 'button'; eye.innerHTML = L.visible ? EYE : EYE_OFF;
+    eye.setAttribute('aria-pressed', String(L.visible)); eye.setAttribute('aria-label', `${L.visible ? 'Hide' : 'Show'} ${L.name}`);
+    eye.onclick = () => { L.visible = !L.visible; renderLayers(); composite(); };
+    const name = document.createElement('button');
+    name.className = 'lname'; name.type = 'button'; name.textContent = L.name;
+    name.title = `Draw on ${L.name} (${i + 1})`; name.onclick = () => setLayer(L.id);
+    const key = document.createElement('span');
+    key.className = 'lkey'; key.textContent = i + 1;
+    row.append(eye, name, key);
+    box.appendChild(row);
+  });
+}
+
+/* ---------------------------------------------------------------- reference */
+const refImg = $('#ref-img'), refFrame = $('#ref-frame'), refEmpty = $('#ref-empty');
+let refFails = 0;
+/* --------------------------------------------------------- online references */
+// Royalty-free references fetched straight from public, keyless APIs:
+//   Openverse (openverse.org)            clothed photos, Creative Commons / public domain, mature filter on
+//   Art Institute of Chicago (artic.edu) drawings, paintings, sculpture; public-domain (CC0) works only
+//   Wikimedia Commons                    nude photo studies: 19th-century public-domain academic and
+//                                        motion studies (e.g. Muybridge) of adult models
+// Every online image keeps its credit (title, creator, licence, source page) and shows it under the frame.
+// Anything whose title, tags or description suggests a minor is dropped, in every mode.
+const refPrefs = {
+  source: 'mine',                               // offline build: your own images only
+  content: store.get('refContent', 'clothed'), // 'clothed' | 'nude' | 'both'
+  kind: store.get('refKind', 'both')           // 'photos' | 'art' | 'both'
+};
+// Sources: 'mine' (your uploads), 'poses' (Posemaniacs 3D pose figures), 'online' (royalty-free
+// photos), 'all'. 'both' is the older setting for "mine + online photos".
+if (refPrefs.source === 'both') refPrefs.source = 'all';
+const usesMine = () => refPrefs.source === 'mine' || refPrefs.source === 'all';
+const usesPoses = () => false;   // offline build: no Posemaniacs
+const usesPhotos = () => false;  // offline build: no online photos
+const usesOnline = () => usesPoses() || usesPhotos();
+
+/* Posemaniacs: royalty-free 3D pose figures (posemaniacs.com). Each pose has an ID and a set of
+   pictures of the same pose from different angles: <id>/<id>_<angle, 5 digits>.webp. The pose IDs
+   come from the site's public sitemap. An angle that doesn't exist simply fails its load check and
+   is skipped. Each pose is credited and links to its page on Posemaniacs. */
+const PM_IDS = '01H0MSWR2B5DK916D3WPBKK4GR 01H0MSD6HNM9EEYJ582E4TDTTG 01GCDG7012ECDM2JHS7HK8KX8X 01GCDG6ZRT68JFMMNG6J82BXTW 01HYDDBH4ZF58BEN33VEP72C9A 01HYDDBH5C7VBPDKZM3Y7EGAE8 01HYCCSRMG1V0J86FVH1B9TV3P 01HYCCSRMH662GK4THZJWRXHGR 01HY2ES137XHF6BM2ZX3R0CF34 01HY2ES1383W57CKBQ3JF8TGHC 01HXNBAHVHEHQF9TQ0BC698M8S 01HXNBAHVJJ94SSXCA1DXH4TZR 01HXH5KX52XVCZH30BMCE29956 01HXH5KX52MMFG8N6CBG54BAFT 01HXH54107Q0XPBKR4F7E9WXDD 01HXH541083DY4VYBF154X5AYP 01HXBSDEGWX70E4FV9PV79MX8J 01HXBSDEGXS682SC0NYPS89EAA 01HXH3W76W4RBXJTYSARMH6SXE 01HXH3W77DGVDG4YJHZN71SEHY 01HXBV5JQXE2FWA6ZJ1D0KYW4E 01HXBV5JR6ZEE4RTJ4Q31691NW 01HXBVPSWHG6WNTZ8DZ2PZ2A7F 01HXBVPSWHZ4JQWHR1PXWJX25J 01HXBVZXFXR751RYD18HHKB2MC 01HXBVZXFYAZ0654N0290WJA86 01HWS8RT9JNAX87RJHPB05Q0M7 01HWS8RT9JX72BQN2YV9CV9G7P 01HWS7QVATN7WTASQAY85J5TPF 01HWS7QVAVD00MBTKRXYSQ1BX9 01HWS7DCF10Z6S9S3ZQ6ZC2JNE 01HWS7DCF1G43A3XZBGCP972JG 01HWS6P7MN357YTZFVNTB0PTKY 01HWS6P7MPHAEV7C1TN5EPX0DD 01HWQGMC4H43DGKTB2A0A810M3 01HWQGMC4JVRGEY7HSC61KPQKH 01HWQB9Q41JVM3GDR0YZJKDBFR 01HWQB9Q42HXR88KZK8NY4RTZ5'.split(' ');
+const PM_MAX_ANGLE = 24;
+const pmMissing = new Set();
+// IDs created within the same second are versions of one pose (e.g. two body types), so they are
+// treated as one pose. Each pose is used once per cycle, at a random angle, before any repeats.
+const pmGroup = id => id.slice(0, 8);
+const PM_GROUPS = [...new Set(PM_IDS.map(pmGroup))];
+const pmUsedGroups = new Set();
+let pmBusy = false, pmFailNotified = false;
+const pmUrl = (id, a) => `https://scdn.posemaniacs.com/muscle-plus/${id}/${id}_${String(a).padStart(5, '0')}.webp`;
+function probeImage(url) {
+  return new Promise(res => {
+    const im = new Image(), t = setTimeout(() => res(false), 10000);
+    im.onload = () => { clearTimeout(t); res(im.naturalWidth > 0); };
+    im.onerror = () => { clearTimeout(t); res(false); };
+    im.src = url;
+  });
+}
+async function refillPoses(want = 8) {
+  if (pmBusy || !usesPoses()) return;
+  pmBusy = true; updateRefCount();
+  const have = new Set(refs.map(r => r.url));
+  let added = 0, tries = 0, loaded = 0;
+  while (added < want && tries < want * 5 && usesPoses()) {
+    tries++;
+    let free = PM_GROUPS.filter(g => !pmUsedGroups.has(g));
+    if (!free.length) {
+      // Every pose has had a turn: start a new cycle (other angles of the same poses).
+      pmUsedGroups.clear(); free = PM_GROUPS.slice();
+      if (refs.some((r, i) => r.kind === 'pose3d' && !seenRefs.has(i))) break;   // still some queued: wait
+    }
+    const grp = pick(free), id = pick(PM_IDS.filter(x => pmGroup(x) === grp));
+    const a = 1 + Math.floor(Math.random() * PM_MAX_ANGLE), url = pmUrl(id, a);
+    if (pmMissing.has(url) || have.has(url) || hiddenRefs.has(url) || seenOnline.has(url)) continue;
+    if (!(await probeImage(url))) { pmMissing.add(url); continue; }
+    loaded++; have.add(url); pmUsedGroups.add(grp);
+    refs.push({ url, name: `Posemaniacs pose ${id.slice(-6)}`, online: true, kind: 'pose3d', nude: false, group: grp,
+      credit: { title: `Pose ${id.slice(-6)}, angle ${a}`, creator: 'Posemaniacs', license: 'Royalty-free pose reference',
+                link: `https://www.posemaniacs.com/tools/viewer/poses/${id}`, source: 'posemaniacs.com' } });
+    added++; updateRefCount(); showPendingRef();
+  }
+  if (!added) {
+    if (!loaded && tries >= want * 5 && !refs.some(r => r.kind === 'pose3d') && !pmFailNotified) {
+      pmFailNotified = true;
+      toast("Couldn't load Posemaniacs poses. Check your connection, or open FigureDraw directly in your browser.");
+    } else {
+      // Every pose angle found so far has been shown: let them come round again.
+      for (const u of [...seenOnline]) if (u.includes('scdn.posemaniacs.com')) seenOnline.delete(u);
+      refs.forEach((r, i) => { if (r.kind === 'pose3d') seenRefs.delete(i); });
+      saveSeen();
+    }
+  }
+  pmBusy = false; updateRefCount(); showPendingRef();
+}
+const CHILD_RE = /\b(child|children|childhood|kid|kids|boy|boys|girl|girls|infant|infants|baby|babies|toddler|toddlers|cupid|cupids|putto|putti|amorini|cherub|cherubs|youth|youths|teen|teens|teenage|teenager|adolescent|adolescence|schoolgirl|schoolboy|minor|minors|son|daughter|juvenile|young|little|maiden|lolita|enfant|enfants|bambino|madonna and child|virgin and child)\b/i;
+const NUDE_RE = /\b(nude|nudes|naked|nudity|undress|undressed|bather|bathers|bathing|odalisque|venus|académie|academie|akt)\b/i;
+const OV_QUERIES = ['full body pose model', 'dancer pose', 'ballet dancer', 'contemporary dance', 'modern dancer', 'hip hop dancer', 'breakdancer',
+  'figure model standing', 'person sitting full body', 'woman sitting on chair', 'man sitting on steps', 'person lying down', 'person kneeling',
+  'yoga pose', 'martial arts pose', 'karate kick', 'boxer', 'fencer', 'athlete in motion', 'sprinter', 'runner', 'long jump', 'high jump',
+  'gymnast', 'acrobat', 'parkour', 'skateboarder', 'rock climber', 'swimmer diving', 'tennis player serve', 'basketball player jump',
+  'person walking full body', 'fashion model full length', 'portrait full body standing', 'street performer', 'juggler', 'musician playing guitar',
+  'cellist', 'drummer', 'cyclist', 'surfer', 'skier', 'ice skater', 'figure skater', 'construction worker', 'farmer working', 'chef cooking',
+  'woman stretching', 'man stretching', 'person jumping', 'person dancing', 'couple dancing', 'tango dancers', 'salsa dancers', 'cosplay full body',
+  'actor on stage', 'mime performer', 'circus performer', 'weightlifter', 'crossfit athlete', 'pilates', 'capoeira', 'flamenco dancer'];
+const AIC_CLOTHED = ['figure study drawing', 'study of a standing figure', 'seated figure drawing', 'dancer drawing', 'full-length portrait painting', 'figure drawing', 'study of a woman drawing', 'study of a man drawing', 'model posing', 'dancers painting'];
+const AIC_NUDE = ['nude study drawing', 'standing nude', 'seated nude', 'reclining nude', 'academic nude', 'nude figure drawing', 'male nude', 'female nude', 'nude painting', 'nude sculpture'];
+const COMMONS_NUDE = ['Muybridge Animal Locomotion nude woman', 'Muybridge Animal Locomotion nude man', 'académie nude photograph 19th century',
+  'Marconi académie photograph', 'nude study photograph 1850s', 'nude model study photograph 19th century', 'nude figure model photograph',
+  'art nude photography woman standing', 'art nude photography man standing', 'nude woman sitting photograph', 'nude man sitting photograph',
+  'nude woman reclining photograph', 'nude male model pose', 'nude female model pose', 'nude dancer photograph', 'nude body painting performance',
+  'life drawing model nude photograph', 'nude yoga photograph', 'figure study nude black and white photograph'];
+const SEX_RE = /\b(sex|sexual|sexy|porn|porno|pornographic|erotic|erotica|explicit|intercourse|masturbat\w*|genital\w*|penis|vagina|vulva|fetish|bdsm|bondage|orgasm|xxx|nsfw|lingerie|stripper|striptease|playboy|hentai)\b/i;
+// Art Institute results are limited to these kinds of work, and anything that looks like an object
+// (pots, vases, coins, textiles, figurines) is dropped, so searches for "figure" don't return pottery.
+const AIC_TYPES = /^(painting|drawing and watercolor|print|photograph|sculpture)$/i;
+const OBJECT_RE = /\b(vase|vases|vessel|vessels|jar|jars|bowl|bowls|cup|cups|plate|plates|dish|dishes|pitcher|jug|amphora|kylix|krater|lekythos|hydria|oinochoe|figurine|figurines|ewer|teapot|bottle|beaker|urn|pot|pots|pottery|ceramic|ceramics|earthenware|stoneware|porcelain|terracotta|faience|textile|textiles|tapestry|coin|coins|medal|medallion|jewelry|brooch|furniture|plaque|fragment|sherd|shard|bead|beads|netsuke|inro|snuff|landscape|still life|seascape|cityscape|architecture|building|map|calligraphy|ornament|pattern|flower|flowers|bird|birds|horse study|animal)\b/i;
+// A candidate's title, tags or subjects must name people before it is even checked.
+const HUMAN_RE = /\b(man|men|woman|women|male|female|person|persons|people|figure|figures|figural|human|humans|nude|nudes|dancer|dancers|dancing|dance|ballerina|ballet|bather|bathers|model|models|athlete|athletes|portrait|gymnast|gymnastics|yoga|runner|running|walking|boxer|boxing|wrestler|wrestling|worker|workers|lady|ladies|gentleman|soldier|soldiers|peasant|peasants|couple|acrobat|skater|climber|climbing|swimmer|cyclist|fencer|fencing|musician|pose|posing|seated|standing|reclining|kneeling|crouching|torso|study of a|académie|academie|odalisque|venus|apollo|hercules|warrior|martial)\b/i;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const stripHtml = s => String(s || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+let emptyRefills = 0, lastOnlineError = '', onlineBusy = false, onlineFailNotified = false, pendingShow = false, nextRefillAt = 0, refillBackoff = 0;
+const seenRefs = new Set();
+const hiddenRefs = new Set(store.get('refHidden', []));
+const seenOnline = new Set(store.get('refSeen', []));
+const saveSeen = () => store.set('refSeen', [...seenOnline].slice(-3000));
+function hideCurrentRef() {
+  const r = refs[refIdx];
+  if (!r || !r.online) return;
+  hiddenRefs.add(r.url);
+  store.set('refHidden', [...hiddenRefs].slice(-1000));
+  r.bad = true;
+  toast('Hidden. It won\u2019t come up again.');
+  changeRef(true);
+}
+
+// Plain fetch(url) with no options: some hosting windows replace fetch with a relay that can't
+// pass along an AbortSignal or other extras, so the timeout is a race instead of an abort.
+async function fetchJSON(url) {
+  let t;
+  const timeout = new Promise((_, rej) => { t = setTimeout(() => rej(new Error('timed out')), 15000); });
+  try {
+    const r = await Promise.race([fetch(url), timeout]);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await Promise.race([r.json(), timeout]);
+  } finally { clearTimeout(t); }
+}
+async function fromOpenverse() {
+  const q = pick(OV_QUERIES), page = 1 + Math.floor(Math.random() * 8);
+  const res = await fetchJSON(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=20&page=${page}&mature=false&category=photograph`);
+  return (res.results || []).filter(r => {
+    const text = `${r.title || ''} ${(r.tags || []).map(t => t.name).join(' ')}`;
+    return r.url && !r.mature && !CHILD_RE.test(text) && !NUDE_RE.test(text) && !OBJECT_RE.test(r.title || '') && HUMAN_RE.test(text);
+  }).map(r => {
+    const lic = r.license === 'cc0' ? 'CC0' : r.license === 'pdm' ? 'Public domain' : `CC ${String(r.license || '').toUpperCase()} ${r.license_version || ''}`.trim();
+    return { url: r.url, alt: r.thumbnail, check: r.thumbnail || r.url, name: r.title || 'Photo', online: true, nude: false, kind: 'photo',
+             credit: { title: r.title || 'Untitled', creator: r.creator || 'Unknown', license: lic, link: r.foreign_landing_url || r.url, source: 'Openverse' } };
+  });
+}
+async function fromAIC(nude) {
+  const q = pick(nude ? AIC_NUDE : AIC_CLOTHED), page = 1 + Math.floor(Math.random() * 5);
+  const res = await fetchJSON(`https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(q)}&query[term][is_public_domain]=true&limit=60&page=${page}` +
+    '&fields=id,title,image_id,artist_title,artist_display,is_public_domain,subject_titles,term_titles,classification_title,classification_titles,artwork_type_title,medium_display');
+  const base = (res.config && res.config.iiif_url) || 'https://www.artic.edu/iiif/2';
+  return (res.data || []).filter(a => {
+    if (!a.image_id || !a.is_public_domain) return false;
+    if (a.artwork_type_title && !AIC_TYPES.test(a.artwork_type_title)) return false;
+    const kindText = `${a.title || ''} ${a.classification_title || ''} ${(a.classification_titles || []).join(' ')} ${a.medium_display || ''}`;
+    if (OBJECT_RE.test(kindText)) return false;
+    const text = `${a.title || ''} ${(a.subject_titles || []).join(' ')} ${(a.term_titles || []).join(' ')}`;
+    if (CHILD_RE.test(text) || !HUMAN_RE.test(text)) return false;
+    return nude ? NUDE_RE.test(text) : !NUDE_RE.test(text);          // nude mode: only works tagged as nudes
+  }).map(a => ({ url: `${base}/${a.image_id}/full/843,/0/default.jpg`, alt: `${base}/${a.image_id}/full/600,/0/default.jpg`, check: `${base}/${a.image_id}/full/400,/0/default.jpg`,
+    name: a.title || 'Artwork', online: true, nude, kind: 'art',
+    credit: { title: a.title || 'Untitled', creator: a.artist_title || stripHtml(a.artist_display) || 'Unknown', license: 'Public domain (CC0)',
+              link: `https://www.artic.edu/artworks/${a.id}`, source: 'Art Institute of Chicago' } }));
+}
+async function fromCommonsNude() {
+  const q = pick(COMMONS_NUDE), off = Math.floor(Math.random() * 6) * 30;
+  const res = await fetchJSON('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6' +
+    `&gsrlimit=30&gsroffset=${off}&gsrsearch=${encodeURIComponent(q)}&prop=imageinfo&iiprop=url|extmetadata|mime&iiurlwidth=900`);
+  const pages = Object.values((res.query && res.query.pages) || {});
+  return pages.map(pg => ({ pg, ii: (pg.imageinfo || [])[0] })).filter(({ pg, ii }) => {
+    if (!ii || !ii.thumburl || !/^image\/(jpeg|png|tiff|webp)/.test(ii.mime || '')) return false;
+    const m = ii.extmetadata || {}, text = `${pg.title} ${stripHtml(m.ImageDescription && m.ImageDescription.value)} ${stripHtml(m.ObjectName && m.ObjectName.value)} ${stripHtml(m.Categories && m.Categories.value)}`;
+    const lic = stripHtml(m.LicenseShortName && m.LicenseShortName.value);
+    return !CHILD_RE.test(text) && !SEX_RE.test(text) && HUMAN_RE.test(text) && /public domain|pd|cc0|cc[ -]by/i.test(lic);
+  }).map(({ pg, ii }) => {
+    const m = ii.extmetadata || {}, title = pg.title.replace(/^File:/, '').replace(/\.[a-z0-9]+$/i, '');
+    return { url: ii.thumburl, alt: ii.thumburl, name: title, online: true, nude: true, kind: 'photo',
+             credit: { title, creator: stripHtml(m.Artist && m.Artist.value) || 'Unknown', license: stripHtml(m.LicenseShortName && m.LicenseShortName.value),
+                       link: ii.descriptionurl || `https://commons.wikimedia.org/wiki/${encodeURIComponent(pg.title)}`, source: 'Wikimedia Commons' } };
+  });
+}
+// On-device person check. Every online candidate is looked at by a small object-detection model
+// (COCO-SSD, TensorFlow.js) before it is shown; only pictures with at least one clearly visible
+// person (a box covering a reasonable share of the image) get through. The model loads once, the
+// first time online references are used (~5 MB), and runs entirely in the browser.
+const TFJS_URL = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
+const COCO_URL = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
+let detectorP = null;
+const rejectedRefs = new Set();
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true; el.crossOrigin = 'anonymous';
+    el.onload = res; el.onerror = () => rej(new Error('could not load ' + src));
+    document.head.appendChild(el);
+  });
+}
+function getDetector() {
+  if (!detectorP) detectorP = (async () => {
+    if (!window.tf) await loadScript(TFJS_URL);
+    if (!window.cocoSsd) await loadScript(COCO_URL);
+    return await window.cocoSsd.load({ base: 'lite_mobilenet_v2' });
+  })().catch(e => { console.warn('[FigureDraw] person detector unavailable; using descriptions only:', e && e.message); return null; });
+  return detectorP;
+}
+function loadCorsImage(src) {
+  return new Promise((res, rej) => {
+    const im = new Image(), t = setTimeout(() => rej(new Error('timed out')), 12000);
+    im.crossOrigin = 'anonymous';
+    im.onload = () => { clearTimeout(t); res(im); };
+    im.onerror = () => { clearTimeout(t); rej(new Error('image failed')); };
+    im.src = src;
+  });
+}
+// 'yes' = a clear person is in the picture, 'no' = none found, 'dead' = the image no longer exists
+// (e.g. Openverse answers 424 when the original photo was deleted), 'unknown' = couldn't check.
+async function figureCheck(item) {
+  const det = await getDetector();
+  const srcs = [item.check, item.url, item.alt].filter((v, i, a) => v && a.indexOf(v) === i);
+  const exists = async () => { for (const u of srcs) if (await probeImage(u)) { item.url = item.url && (await probeImage(item.url)) ? item.url : u; return true; } return false; };
+  if (!det) return (await exists()) ? 'unknown' : 'dead';
+  let img = null;
+  for (const u of srcs) { try { img = await loadCorsImage(u); break; } catch (e) {} }
+  if (!img) return (await exists()) ? 'unknown' : 'dead';
+  let preds;
+  try { preds = await det.detect(img, 10, item.kind === 'art' ? .3 : .45); } catch (e) { return 'unknown'; }
+  const A = (img.naturalWidth * img.naturalHeight) || 1, minShare = item.kind === 'art' ? .04 : .06;
+  return preds.some(p => p.class === 'person' && (p.bbox[2] * p.bbox[3]) / A >= minShare) ? 'yes' : 'no';
+}
+function showPendingRef() {
+  if (pendingShow && (refIdx < 0 || !isEligible(refIdx))) {
+    const j = nextRefIndex();
+    if (j >= 0) { pendingShow = false; if (session.phase !== 'free') session.order[session.i] = j; setRef(j); }
+  }
+}
+// Which providers match the current preferences.
+function onlineProviders() {
+  // Photos only. Each refill asks with several different random searches at once for variety.
+  const P = [];
+  if (refPrefs.content !== 'nude') P.push(fromOpenverse, fromOpenverse, fromOpenverse);
+  if (refPrefs.content !== 'clothed') P.push(fromCommonsNude, fromCommonsNude);
+  return P;
+}
+async function refillOnline() {
+  if (onlineBusy || !usesPhotos() || performance.now() < nextRefillAt) return;
+  const providers = onlineProviders();
+  if (!providers.length) return;
+  onlineBusy = true; updateRefCount();
+  const results = await Promise.allSettled(providers.map(f => f()));
+  const have = new Set([...refs.map(r => r.url), ...hiddenRefs, ...rejectedRefs, ...seenOnline]);
+  const cands = [];
+  for (const r of results) if (r.status === 'fulfilled') for (const item of r.value) {
+    if (have.has(item.url)) continue;
+    have.add(item.url); cands.push(item);
+  }
+  for (let i = cands.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cands[i], cands[j]] = [cands[j], cands[i]]; }
+  // Check each candidate for a visible person; add the ones that pass as soon as they pass.
+  let added = 0;
+  const unknown = [];
+  for (const item of cands.slice(0, 40)) {
+    if (!usesPhotos()) break;
+    const v = await figureCheck(item);
+    if (v === 'yes') {
+      // Show the full image if it loads, otherwise the version that passed the check.
+      if (!(await probeImage(item.url))) item.url = item.check || item.alt || item.url;
+      refs.push(item); added++; updateRefCount(); showPendingRef();
+    }
+    else if (v === 'unknown') unknown.push(item);
+    else rejectedRefs.add(item.url);                         // 'no' person, or 'dead' image
+  }
+  // If pictures couldn't be checked at all (detector blocked, or a host that doesn't allow it),
+  // fall back to the description check they already passed rather than showing nothing.
+  if (!added && unknown.length) for (const item of unknown) { refs.push(item); added++; }
+  onlineBusy = false;
+  // Be polite to the free APIs: wait a few seconds between requests, and back off up to a minute
+  // when a request brings nothing new (or fails).
+  const failed = results.every(r => r.status === 'rejected');
+  if (added) { refillBackoff = 0; emptyRefills = 0; }
+  else if (failed) refillBackoff = Math.min(30000, (refillBackoff || 2000) * 2);
+  else if (++emptyRefills >= 6) { refillBackoff = 20000; emptyRefills = 0; if (seenOnline.size > 200) { seenOnline.clear(); saveSeen(); } }
+  else refillBackoff = 1200;                                // nothing new this time: try other searches soon
+  nextRefillAt = performance.now() + (added ? 800 : refillBackoff);
+  if (!added && results.every(r => r.status === 'rejected')) {
+    // Say why, so problems can be fixed: a blocked request (embedded preview, privacy extension,
+    // strict network) looks different from a rate limit or the service being down.
+    const why = results.map(r => String(r.reason && (r.reason.message || r.reason))).join(' / ');
+    const blocked = /failed to fetch|networkerror|load failed|aborted|cors|content security/i.test(why);
+    const limited = /429/.test(why);
+    lastOnlineError = blocked ? "blocked: this window is not allowed to reach the internet. Open the file directly in Chrome, Edge or Safari (not a preview panel) and allow it through any privacy or ad blocker."
+      : limited ? 'the free image services are rate-limiting requests. Wait a minute and press Change reference.'
+      : `the image services returned an error (${why}).`;
+    console.warn('[FigureDraw] online references failed:', why);
+    if (!onlineFailNotified) { onlineFailNotified = true; toast("Online references didn't load: " + lastOnlineError); }
+  } else lastOnlineError = '';
+  if (added) onlineFailNotified = false;
+  updateRefCount();
+  showPendingRef();
+}
+function isEligible(i) {
+  const r = refs[i];
+  if (!r || r.bad) return false;
+  if (!r.online) return usesMine();
+  if (r.kind === 'pose3d') return usesPoses();
+  if (!usesPhotos()) return false;
+  if (r.nude ? refPrefs.content === 'clothed' : refPrefs.content === 'nude') return false;
+  if (r.kind !== 'photo') return false;
+  return true;
+}
+const eligibleRefs = () => refs.map((_, i) => i).filter(isEligible);
+// Next reference: prefer ones not shown yet; keep a few online ones in reserve.
+function nextRefIndex() {
+  const cur = refs[refIdx];
+  const el = eligibleRefs().filter(i => i !== refIdx && !(cur && cur.group && refs[i].group === cur.group));
+  const unseen = el.filter(i => !seenRefs.has(i));
+  // Keep a reserve of fresh online images so the next one is ready immediately.
+  if (usesPhotos() && unseen.filter(i => refs[i].online && refs[i].kind === 'photo').length < 10) refillOnline();
+  if (usesPoses() && unseen.filter(i => refs[i].kind === 'pose3d').length < 6) refillPoses();
+  if (unseen.length) return pick(unseen);
+  // Your own images cycle once they've all been shown; online images never repeat, we fetch more.
+  const mine = el.filter(i => !refs[i].online);
+  if (usesMine() && mine.length) { mine.forEach(i => seenRefs.delete(i)); return pick(mine); }
+  return -1;
+}
+function showCredit() {
+  const el = $('#ref-credit'), r = refs[refIdx];
+  $('#ref-hide').hidden = !(r && r.online);
+  if (!r || !r.online) { el.hidden = true; el.textContent = ''; return; }
+  const c = r.credit;
+  el.hidden = false; el.textContent = '';
+  const a = document.createElement('a');
+  a.href = c.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = `“${c.title}”`;
+  el.append(a, ` by ${c.creator} · ${c.license} · ${c.source}`);
+}
+function setRefPref(k, v) {
+  refPrefs[k] = v;
+  nextRefillAt = 0; refillBackoff = 0;                     // new preferences may need new sources
+  store.set({ source: 'refSource', content: 'refContent', kind: 'refKind' }[k], v);
+  syncRefPrefsUI();
+  if (usesPoses()) refillPoses();
+  if (refIdx >= 0 && !isEligible(refIdx)) { pendingShow = true; const j = nextRefIndex(); if (j >= 0) { pendingShow = false; setRef(j); } else setRef(-1); }
+  else if (refIdx < 0 && usesOnline()) { pendingShow = true; const j = nextRefIndex(); if (j >= 0) { pendingShow = false; setRef(j); } }
+  updateRefCount();
+}
+function syncRefPrefsUI() {
+  $('#ref-source').value = refPrefs.source; $('#ref-content').value = refPrefs.content;
+  const online = usesPhotos();
+  $('#ref-online-opts').hidden = !online;
+  $('#ref-note').textContent = online && refPrefs.content !== 'clothed'
+    ? 'Nude references are artistic figure-study photos of adult models (Wikimedia Commons, free licences).' : '';
+}
+$('#ref-source').addEventListener('change', e => setRefPref('source', e.target.value));
+$('#ref-hide').addEventListener('click', hideCurrentRef);
+$('#ref-content').addEventListener('change', e => setRefPref('content', e.target.value));
+
+
+function applyRefTransform() {
+  refImg.style.transform = `translate(${refView.x}px, ${refView.y}px) scale(${refView.z}) scaleX(${state.mirror ? -1 : 1})`;
+}
+function setRef(i) {
+  refIdx = refs[i] ? i : -1;
+  refView.z = 1; refView.x = refView.y = 0;
+  if (refIdx < 0) {
+    refImg.hidden = true; refImg.removeAttribute('src'); refEmpty.hidden = false;
+    $('#ref-empty-title').textContent = usesOnline() && (onlineBusy || pmBusy) ? 'Finding a figure reference…' : 'No reference yet';
+  }
+  else {
+    refEmpty.hidden = true; refImg.hidden = false; refImg.src = refs[refIdx].url; seenRefs.add(refIdx);
+    if (refs[refIdx].online) { seenOnline.add(refs[refIdx].url); saveSeen(); }
+  }
+  applyRefTransform(); updateRefCount(); showCredit();
+}
+refImg.addEventListener('load', () => { refFails = 0; });
+refImg.addEventListener('error', () => {
+  if (refIdx < 0) return;
+  const r = refs[refIdx];
+  if (r.online) {
+    // Online image failed: try its smaller version once, then skip it.
+    if (r.alt && r.url !== r.alt) { r.url = r.alt; refImg.src = r.url; return; }
+    r.bad = true;
+    const j = nextRefIndex();
+    if (j >= 0) { if (session.phase !== 'free') session.order[session.i] = j; setRef(j); } else { pendingShow = true; setRef(-1); }
+    return;
+  }
+  // Some viewers (embedded previews, strict browser settings) refuse temporary blob: links.
+  // Retry once with the image read into a data: URL before giving up on this file.
+  if (!r.triedData) {
+    r.triedData = true;
+    const fr = new FileReader();
+    fr.onload = () => { r.url = fr.result; if (refs[refIdx] === r) refImg.src = r.url; };
+    fr.onerror = () => refImg.dispatchEvent(new Event('error'));
+    fr.readAsDataURL(r.file);
+    return;
+  }
+  toast(isHeic(r.file) ? `${r.name} is an iPhone HEIC photo, which only Safari can show. Export it as JPG or change iPhone Camera settings to "Most Compatible".`
+                       : `Couldn't display ${r.name}.`);
+  if (++refFails < 5 && refs.length > 1) changeRef(true);
+});
+const IMG_EXT = /\.(jpe?g|png|webp|gif|avif|bmp|heic|heif|jfif|tiff?)$/i;
+const isHeic = f => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+function changeRef(quiet) {
+  const j = nextRefIndex();
+  if (j < 0) {
+    if (usesOnline()) { pendingShow = true; if (!quiet) toast('Loading a new reference…'); refillOnline(); refillPoses(); return; }
+    if (!quiet) toast(eligibleRefs().length ? 'Only one image is loaded.' : 'Load some images first.');
+    return;
+  }
+  if (session.phase !== 'free') session.order[session.i] = j;
+  setRef(j);
+}
+function updateRefCount() {
+  const mine = refs.filter(r => !r.online).length, online = refs.filter((r, i) => r.online && r.kind === 'photo' && isEligible(i) && !seenRefs.has(i)).length;
+  const parts = [];
+  if (usesMine()) parts.push(mine ? `${mine} of your image${mine === 1 ? '' : 's'}` : 'none of your images loaded');
+  if (usesPoses()) { const pm = refs.filter((r, i) => r.kind === 'pose3d' && !seenRefs.has(i)).length; parts.push(pm ? `${pm} Posemaniacs pose${pm === 1 ? '' : 's'} ready` : pmBusy ? 'loading Posemaniacs poses…' : 'Posemaniacs poses'); }
+  if (usesPhotos()) parts.push(onlineBusy ? 'finding figure references…' : lastOnlineError && !online ? 'online references failed: ' + lastOnlineError : (online ? `${online} new online reference${online === 1 ? '' : 's'} ready` : 'loading more online references…'));
+  const t = parts.join(', ').replace(/^./, c => c.toUpperCase());
+  $('#ref-count').textContent = t;
+  $('#setup-refs-text').textContent = eligibleRefs().length || usesOnline() ? t + '.' : 'No images loaded. The timer will still run without a reference.';
+  updateBar();
+}
+function addFiles(list) {
+  // Accept by MIME type, or by file extension when the system reports no type (common for
+  // folders, cloud drives and some phones).
+  const imgs = Array.from(list).filter(f => f.type.startsWith('image/') || (!f.type && IMG_EXT.test(f.name)));
+  if (!imgs.length) { toast('No images found in that selection.'); return; }
+  const first = refs.length;
+  imgs.forEach(f => refs.push({ url: URL.createObjectURL(f), name: f.name, file: f }));
+  if (!usesMine()) {
+    toast('Your images are added. Switch References to "My images" or "Everything" to see them.');
+  } else if (refIdx < 0) {
+    const start = first + Math.floor(Math.random() * imgs.length);
+    if (session.phase !== 'free') session.order[session.i] = start;
+    setRef(start);
+  } else updateRefCount();
+  toast(`Added ${imgs.length} image${imgs.length === 1 ? '' : 's'}.`);
+}
+const fileImages = $('#file-images'), fileFolder = $('#file-folder');
+[fileImages, fileFolder].forEach(inp => inp.addEventListener('change', () => { addFiles(inp.files); inp.value = ''; }));
+$('#load-images').onclick = $('#setup-images').onclick = () => fileImages.click();
+$('#load-folder').onclick = $('#setup-folder').onclick = () => fileFolder.click();
+$('#ref-change').onclick = () => changeRef();
+// Pan offsets are measured from the frame's centre (the transform origin), so a point q on the
+// image sits at x + z*q on screen. Zooming around a point c keeps c fixed: x' = c - (c - x) * z'/z.
+// Panning stops once the photo's edge reaches the frame's edge, so it can't be dragged away.
+function clampRefPan() {
+  const fw = refFrame.clientWidth, fh = refFrame.clientHeight, iw = refImg.naturalWidth, ih = refImg.naturalHeight;
+  let w = fw, h = fh;
+  if (iw && ih) { const s = Math.min(fw / iw, fh / ih); w = iw * s; h = ih * s; }
+  const mx = Math.max(0, (w * refView.z - fw) / 2), my = Math.max(0, (h * refView.z - fh) / 2);
+  refView.x = clamp(refView.x, -mx, mx); refView.y = clamp(refView.y, -my, my);
+}
+function zoomRef(f, cx = 0, cy = 0) {
+  const z0 = refView.z, z = clamp(z0 * f, 1, 6);
+  if (z === z0) return;
+  refView.x = cx - (cx - refView.x) * z / z0;
+  refView.y = cy - (cy - refView.y) * z / z0;
+  refView.z = z;
+  clampRefPan(); applyRefTransform();
+}
+function refLocal(e) {
+  const r = refFrame.getBoundingClientRect();
+  return { x: e.clientX - r.left - r.width / 2, y: e.clientY - r.top - r.height / 2 };
+}
+$('#zoom-in').onclick = () => zoomRef(1.25);
+$('#zoom-out').onclick = () => zoomRef(1 / 1.25);
+$('#zoom-reset').onclick = () => { refView.z = 1; refView.x = refView.y = 0; applyRefTransform(); };
+// Zoom toward the pointer. The amount follows the wheel delta, so a mouse wheel moves in steps
+// while trackpad scrolling and pinching (sent as Ctrl+wheel) stay smooth.
+refFrame.addEventListener('wheel', e => {
+  if (refIdx < 0) return;
+  e.preventDefault();
+  const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * refFrame.clientHeight : e.deltaY;
+  const p = refLocal(e);
+  zoomRef(Math.exp(-clamp(dy, -100, 100) * (e.ctrlKey ? .01 : .002)), p.x, p.y);
+}, { passive: false });
+// One pointer drags; two touch points pinch-zoom around their midpoint.
+const refPts = new Map();
+let refGesture = null;
+function beginRefGesture() {
+  const p = [...refPts.values()];
+  if (p.length >= 2) {
+    const [a, b] = p;
+    refGesture = { pinch: true, d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, z: refView.z, ox: refView.x, oy: refView.y };
+  } else if (p.length === 1) {
+    refGesture = { pinch: false, sx: p[0].x, sy: p[0].y, ox: refView.x, oy: refView.y };
+  } else refGesture = null;
+  refFrame.classList.toggle('grabbing', !!refGesture);
+}
+refFrame.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  refPts.set(e.pointerId, refLocal(e));
+  try { refFrame.setPointerCapture(e.pointerId); } catch (err) {}
+  beginRefGesture();
+});
+refFrame.addEventListener('pointermove', e => {
+  if (!refPts.has(e.pointerId)) return;
+  refPts.set(e.pointerId, refLocal(e));
+  const g = refGesture;
+  if (!g) return;
+  if (g.pinch) {
+    const [a, b] = [...refPts.values()];
+    const z = clamp(g.z * Math.hypot(a.x - b.x, a.y - b.y) / g.d, 1, 6), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    refView.x = mx - (g.mx - g.ox) * z / g.z;
+    refView.y = my - (g.my - g.oy) * z / g.z;
+    refView.z = z;
+  } else {
+    const p = refPts.get(e.pointerId);
+    refView.x = g.ox + p.x - g.sx; refView.y = g.oy + p.y - g.sy;
+  }
+  clampRefPan(); applyRefTransform();
+});
+const endRefPointer = e => { refPts.delete(e.pointerId); beginRefGesture(); };
+refFrame.addEventListener('pointerup', endRefPointer);
+refFrame.addEventListener('pointercancel', endRefPointer);
+
+function toggleMirror() {
+  state.mirror = !state.mirror;
+  mirrorLayer.classList.toggle('mirror', state.mirror);
+  $('#ref-flip').setAttribute('aria-pressed', String(state.mirror));
+  applyRefTransform();
+}
+function swapSide() {
+  const on = $('#desk').classList.toggle('ref-left');
+  store.set('refLeft', on);
+}
+$('#ref-flip').onclick = toggleMirror;
+$('#ref-swap').onclick = swapSide;
+
+/* ------------------------------------------------------------------ session */
+const PRESETS = {
+  gesture: '10x30s, 5x1m',
+  warmup: '6x30s, 4x1m, 4x2m, 1x5m',
+  class: '6x30s, 4x1m, 3x2m, 2x5m, 1x10m, 1x25m',
+  long: '1x30m'
+};
+function parsePlan(str) {
+  const parts = str.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return { error: 'Enter at least one pose, like 5x30s.' };
+  const plan = [];
+  for (const p of parts) {
+    const m = p.toLowerCase().match(/^(?:(\d+)\s*[x\u00d7*]\s*)?(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds?|m|min|mins|minutes?|h|hr|hrs|hours?)$/);
+    if (!m) return { error: `Can't read "${p}". Use a count and a time with a unit, like 5x30s or 2x5m.` };
+    const count = m[1] ? parseInt(m[1], 10) : 1, u = m[3][0];
+    const secs = Math.round(parseFloat(m[2]) * (u === 's' ? 1 : u === 'm' ? 60 : 3600));
+    if (count < 1 || count > 100) return { error: `"${p}": use a count between 1 and 100.` };
+    if (secs < 5 || secs > 10800) return { error: `"${p}": each pose must be between 5 seconds and 3 hours.` };
+    for (let i = 0; i < count; i++) plan.push(secs);
+  }
+  if (plan.length > 200) return { error: 'That is more than 200 poses. Try fewer.' };
+  return { plan };
+}
+function buildOrder(n, m, shuffle) {
+  if (!m) return Array(n).fill(-1);
+  const out = []; let pool = [], last = -1;
+  while (out.length < n) {
+    if (!pool.length) {
+      pool = Array.from({ length: m }, (_, i) => i);
+      if (shuffle) {
+        for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+        if (m > 1 && pool[0] === last) [pool[0], pool[1]] = [pool[1], pool[0]];
+      }
+    }
+    last = pool.shift(); out.push(last);
+  }
+  return out;
+}
+let audio = null;
+function ensureAudio() {
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch (e) {}
+}
+function beep(freq, dur) {
+  if (!session.sound || !audio) return;
+  try {
+    const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
+    o.frequency.value = freq; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(.16, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.start(t); o.stop(t + dur + .03);
+  } catch (e) {}
+}
+function startSession(plan) {
+  ensureAudio();
+  clearInterval(session.timer);
+  // Uploaded-only sessions plan the order up front; online sessions pick the next fresh image at each pose.
+  const el = refPrefs.source === 'mine' ? eligibleRefs() : [];
+  const order = buildOrder(plan.length, el.length, $('#opt-shuffle').checked).map(k => k < 0 ? -1 : el[k]);
+  Object.assign(session, { plan, shots: [], saved: false, order, sound: $('#opt-sound').checked });
+  loadPose(0);
+}
+function loadPose(i) {
+  clearInterval(session.timer);
+  session.i = i; session.total = session.plan[i]; session.remaining = session.total * 1000; session.strokes = 0;
+  pointerId = null;
+  wipeCanvas(); $('#veil').hidden = true;
+  let ri = session.order[i];
+  if (ri < 0 || !isEligible(ri)) { ri = nextRefIndex(); session.order[i] = ri; }
+  if (ri < 0 && usesOnline()) pendingShow = true;
+  setRef(ri);
+  session.phase = 'ready';
+  if (i > 0) startClock(); else updateBar();
+}
+function startClock() {
+  session.phase = 'running'; session.endAt = performance.now() + session.remaining;
+  clearInterval(session.timer); session.timer = setInterval(tick, 100);
+  updateBar(); tick();
+}
+function tick() {
+  if (session.phase !== 'running') return;
+  const rem = session.endAt - performance.now();
+  if (rem <= 0) { finishPose('time'); return; }
+  $('#clock').textContent = fmtClock(rem);
+  $('#progress-fill').style.width = (rem / (session.total * 1000) * 100) + '%';
+}
+function pauseClock() {
+  if (session.phase !== 'running') return;
+  session.remaining = Math.max(0, session.endAt - performance.now());
+  clearInterval(session.timer);
+  if (stroke) endStroke();
+  pointerId = null; lasso.on = false; lasso.pts = [];
+  session.phase = 'paused'; $('#veil').hidden = false; cursorEl.hidden = true;
+  updateBar();
+}
+function resumeClock() {
+  if (session.phase !== 'paused') return;
+  $('#veil').hidden = true; startClock();
+}
+function toggleClock() {
+  if (session.phase === 'running') pauseClock();
+  else if (session.phase === 'paused') resumeClock();
+  else if (session.phase === 'ready') startClock();
+}
+function finishPose(reason) {
+  if (session.phase === 'free' || session.phase === 'done') return;
+  const rem = session.phase === 'running' ? Math.max(0, session.endAt - performance.now()) : session.remaining;
+  clearInterval(session.timer);
+  commitPending();
+  if (session.strokes > 0) {
+    const flat = flatten(), th = mk(360, 480), tg = th.getContext('2d');
+    tg.imageSmoothingQuality = 'high'; tg.drawImage(flat, 0, 0, 360, 480);
+    const shot = { n: session.i + 1, planned: session.total, used: reason === 'time' ? session.total : Math.round(session.total - rem / 1000), thumb: th.toDataURL('image/jpeg', .9), blob: null };
+    shot.ready = toBlob(flat).then(b => { shot.blob = b; });
+    session.shots.push(shot);
+  }
+  const last = session.i + 1 >= session.plan.length;
+  if (reason === 'end') { session.phase = 'done'; updateBar(); showReview(); return; }
+  if (reason === 'time') beep(last ? 660 : 880, last ? .4 : .18);
+  if (last) { session.phase = 'done'; updateBar(); showReview(); }
+  else loadPose(session.i + 1);
+}
+function endToFree() {
+  clearInterval(session.timer);
+  Object.assign(session, { phase: 'free', plan: [], i: 0, total: 0, remaining: 0, order: [], shots: [], strokes: 0, saved: false });
+  $('#veil').hidden = true; updateBar();
+}
+async function askPaused(msg, yes) {
+  const wasRunning = session.phase === 'running';
+  if (wasRunning) pauseClock();
+  const ok = await ask(msg, yes);
+  if (wasRunning && session.phase === 'paused') resumeClock();
+  return ok;
+}
+async function restartPose() {
+  if (session.phase !== 'running' && session.phase !== 'paused') return;
+  if (!(await askPaused('Restart this pose? Your drawing will be cleared and the clock reset.', 'Restart pose'))) return;
+  clearInterval(session.timer); commitPending();
+  session.remaining = session.total * 1000; session.strokes = 0;
+  wipeCanvas(); $('#veil').hidden = true; session.phase = 'ready'; updateBar();
+}
+async function endSession() {
+  if (session.phase === 'free' || session.phase === 'done') return;
+  if (!(await askPaused('End the session? Drawings you have finished stay in the review sheet.', 'End session'))) return;
+  finishPose('end');
+}
+function skipPose() {
+  if (session.phase === 'free' || session.phase === 'done') return;
+  finishPose('skip');
+}
+function updateBar() {
+  const ph = session.phase, free = ph === 'free', done = ph === 'done', idle = free || done;
+  const clock = $('#clock'), main = $('#meta-main'), sub = $('#meta-sub');
+  clock.classList.toggle('idle', idle);
+  if (idle) {
+    clock.textContent = done ? 'Done' : 'Free draw';
+    main.textContent = done ? 'Session complete' : '';
+    sub.textContent = done ? 'Your drawings are in the review sheet.'
+      : refs.length ? 'Draw freely, or start a timed session.' : 'Load reference photos on the right, then start a session.';
+  } else {
+    clock.textContent = fmtClock(ph === 'running' ? session.endAt - performance.now() : session.remaining);
+    main.textContent = `Pose ${session.i + 1} of ${session.plan.length}`;
+    sub.textContent = ph === 'ready' ? 'Start drawing to start the clock.' : ph === 'paused' ? 'Paused.'
+      : (session.i + 1 < session.plan.length ? `Next: ${humanDur(session.plan[session.i + 1])}` : 'Last pose.');
+  }
+  $('#new-session').hidden = !free;
+  $('#pause').hidden = !(ph === 'running' || ph === 'paused');
+  $('#pause').textContent = ph === 'paused' ? 'Resume' : 'Pause';
+  const lastPose = !idle && session.i + 1 >= session.plan.length;
+  $('#skip').hidden = idle; $('#end').hidden = idle || lastPose;
+  $('#skip').textContent = lastPose ? 'Finish' : 'Next pose';
+  $('#skip').title = lastPose ? 'Finish the session and review your drawings' : 'Finish this pose now and move on';
+  $('#restart').hidden = !(ph === 'running' || ph === 'paused');
+  $('#progress').hidden = idle;
+  if (!idle) {
+    const left = ph === 'running' ? Math.max(0, session.endAt - performance.now()) : session.remaining;
+    $('#progress-fill').style.width = (left / (session.total * 1000) * 100) + '%';
+  }
+}
+$('#pause').onclick = () => session.phase === 'paused' ? resumeClock() : pauseClock();
+$('#skip').onclick = skipPose;
+$('#restart').onclick = restartPose;
+$('#end').onclick = endSession;
+$('#new-session').onclick = openSetup;
+
+/* ------------------------------------------------------------------- dialogs */
+function ask(msg, yes = 'OK') {
+  return new Promise(resolve => {
+    const d = $('#confirm');
+    $('#confirm-msg').textContent = msg; $('#confirm-yes').textContent = yes;
+    const done = v => { d.onclose = null; if (d.open) d.close(); resolve(v); };
+    $('#confirm-yes').onclick = () => done(true);
+    $('#confirm-no').onclick = () => done(false);
+    d.onclose = () => resolve(false);
+    d.showModal();
+  });
+}
+function readPlan() {
+  const id = (document.querySelector('input[name="preset"]:checked') || {}).value;
+  return parsePlan(id === 'custom' ? $('#plan-custom').value : PRESETS[id] || '');
+}
+function updateSetupInfo() {
+  const id = (document.querySelector('input[name="preset"]:checked') || {}).value;
+  $('#plan-custom').disabled = id !== 'custom';
+  const r = readPlan(), info = $('#plan-info');
+  if (r.error) { info.textContent = r.error; info.classList.add('err'); $('#setup-start').disabled = true; return; }
+  info.classList.remove('err');
+  info.textContent = `${r.plan.length} pose${r.plan.length === 1 ? '' : 's'}, ${humanTotal(r.plan.reduce((a, b) => a + b, 0))} in total.`;
+  $('#setup-start').disabled = false;
+}
+function openSetup() {
+  const last = store.get('preset', 'gesture');
+  const radio = document.querySelector(`input[name="preset"][value="${last}"]`) || document.querySelector('input[name="preset"][value="gesture"]');
+  radio.checked = true;
+  $('#plan-custom').value = store.get('custom', '');
+  $('#opt-shuffle').checked = store.get('shuffle', true);
+  $('#opt-sound').checked = store.get('sound', true);
+  updateRefCount(); updateSetupInfo();
+  $('#setup').showModal();
+}
+$$('input[name="preset"]').forEach(r => r.addEventListener('change', () => { updateSetupInfo(); if (r.value === 'custom') $('#plan-custom').focus(); }));
+$('#plan-custom').addEventListener('input', updateSetupInfo);
+$('#setup-cancel').onclick = () => $('#setup').close();
+$('#setup-start').onclick = () => {
+  const r = readPlan();
+  if (r.error) return;
+  const id = document.querySelector('input[name="preset"]:checked').value;
+  store.set('preset', id); store.set('custom', $('#plan-custom').value);
+  store.set('shuffle', $('#opt-shuffle').checked); store.set('sound', $('#opt-sound').checked);
+  $('#setup').close();
+  startSession(r.plan);
+};
+
+/* ------------------------------------------------------------------- exports */
+const toBlob = (c, type = 'image/png') => new Promise(res => c.toBlob(res, type));
+const blobBytes = async b => new Uint8Array(await b.arrayBuffer());
+function saveBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+}
+const loadImage = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+
+// Minimal ZIP writer (stored, no compression) so the app needs no libraries.
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files) {
+  const enc = new TextEncoder(), parts = [], central = [], now = new Date();
+  const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name), crc = crc32(f.data), size = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, size, true); lh.setUint32(22, size, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), name, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+    ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true); ch.setUint32(16, crc, true);
+    ch.setUint32(20, size, true); ch.setUint32(24, size, true); ch.setUint16(28, name.length, true);
+    ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  }
+  const cdSize = central.reduce((a, p) => a + p.length, 0), end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+async function exportPng() {
+  commitPending();
+  saveBlob(await toBlob(flatten()), `figure-study-${stampName()}.png`);
+}
+async function exportZip() {
+  commitPending();
+  const files = [{ name: 'study.png', data: await blobBytes(await toBlob(flatten())) }];
+  for (let i = layers.length - 1; i >= 0; i--) {
+    const L = layers[i];
+    files.push({ name: `layers/${layers.length - i} ${L.name}.png`, data: await blobBytes(await toBlob(layerImage(L))) });
+  }
+  const r = refs[refIdx];
+  if (r && r.file) files.push({ name: `reference/${r.name}`, data: new Uint8Array(await r.file.arrayBuffer()) });
+  else if (r && r.online) {
+    const c = r.credit, txt = `Reference: "${c.title}" by ${c.creator}\nLicence: ${c.license}\nSource: ${c.source}\n${c.link}\n`;
+    files.push({ name: 'reference/credit.txt', data: new TextEncoder().encode(txt) });
+    try { const b = await (await fetch(r.url)).blob(); files.push({ name: `reference/${(r.name || 'reference').replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 60)}.jpg`, data: await blobBytes(b) }); } catch (e) {}
+  }
+  saveBlob(makeZip(files), `figure-study-${stampName()}.zip`);
+}
+$('#export').onclick = () => $('#export-dlg').showModal();
+$('#export-close').onclick = () => $('#export-dlg').close();
+$('#export-png').onclick = async () => { await exportPng(); $('#export-dlg').close(); };
+$('#export-zip').onclick = async () => { await exportZip(); $('#export-dlg').close(); };
+
+/* -------------------------------------------------------------------- review */
+async function showReview() {
+  if (!session.shots.length) { toast('Nothing was drawn, so there is no sheet to review.'); endToFree(); return; }
+  const grid = $('#sheet');
+  grid.innerHTML = '';
+  for (const sh of session.shots) {
+    const fig = document.createElement('figure'); fig.className = 'shot';
+    const img = new Image(); img.src = sh.thumb; img.alt = `Drawing for pose ${sh.n}`;
+    const cap = document.createElement('figcaption'); cap.textContent = `Pose ${sh.n}, ${humanDur(sh.planned)}`;
+    fig.append(img, cap); grid.appendChild(fig);
+  }
+  $('#review-count').textContent = `${session.shots.length} drawing${session.shots.length === 1 ? '' : 's'} from ${session.plan.length} pose${session.plan.length === 1 ? '' : 's'}.`;
+  $('#review').showModal();
+}
+async function makeSheet() {
+  await Promise.all(session.shots.map(sh => sh.ready));
+  const shots = session.shots, n = shots.length, cols = n <= 4 ? n : n <= 12 ? 4 : 5, rows = Math.ceil(n / cols);
+  const cw = 360, ch = 480, gap = 20, cap = 32, m = 28;
+  const c = mk(m * 2 + cols * cw + (cols - 1) * gap, m * 2 + rows * (ch + cap) + (rows - 1) * gap), g = c.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.fillStyle = '#f4f5f7'; g.fillRect(0, 0, c.width, c.height);
+  g.font = '17px "Avenir Next","Segoe UI",system-ui,sans-serif'; g.textBaseline = 'top';
+  for (let i = 0; i < n; i++) {
+    const bmp = await createImageBitmap(shots[i].blob), x = m + (i % cols) * (cw + gap), y = m + Math.floor(i / cols) * (ch + cap + gap);
+    g.drawImage(bmp, x, y, cw, ch); bmp.close();
+    g.strokeStyle = '#8a92a0'; g.lineWidth = 1; g.strokeRect(x + .5, y + .5, cw - 1, ch - 1);
+    g.fillStyle = '#14161a'; g.fillText(`Pose ${shots[i].n}, ${humanDur(shots[i].planned)}`, x, y + ch + 9);
+  }
+  return c;
+}
+$('#review-sheet').onclick = async () => {
+  saveBlob(await toBlob(await makeSheet()), `figure-session-${stampName()}.png`);
+  session.saved = true;
+};
+async function saveSessionZip() {
+  await Promise.all(session.shots.map(sh => sh.ready));
+  const files = [];
+  for (const sh of session.shots) files.push({ name: `pose-${pad2(sh.n)}-${sh.planned}s.png`, data: await blobBytes(sh.blob) });
+  saveBlob(makeZip(files), `figure-session-${stampName()}.zip`);
+  session.saved = true;
+}
+$('#review-zip').onclick = saveSessionZip;
+function askUnsaved() {
+  return new Promise(resolve => {
+    const d = $('#unsaved'), n = session.shots.length;
+    $('#unsaved-msg').textContent = n === 1
+      ? "This drawing hasn't been saved. Once the review sheet closes, it's gone."
+      : `These ${n} drawings haven't been saved. Once the review sheet closes, they're gone.`;
+    const done = v => { d.onclose = null; if (d.open) d.close(); resolve(v); };
+    $('#unsaved-save').onclick = () => done('save');
+    $('#unsaved-discard').onclick = () => done('discard');
+    $('#unsaved-back').onclick = () => done('back');
+    d.onclose = () => resolve('back');
+    d.showModal();
+    $('#unsaved-save').focus();
+  });
+}
+// Every way out of the review sheet comes through here, so unsaved drawings always get a save offer.
+async function closeReview(then) {
+  if (!session.saved) {
+    const choice = await askUnsaved();
+    if (choice === 'back') return;
+    if (choice === 'save') await saveSessionZip();
+  }
+  $('#review').close();
+  if (then) then();
+}
+$('#review-close').onclick = () => closeReview();
+$('#review-new').onclick = () => closeReview(openSetup);
+$('#review').addEventListener('cancel', e => { e.preventDefault(); closeReview(); });
+$('#review').addEventListener('close', endToFree);
+
+/* ------------------------------------------------------------------ controls */
+$$('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+$$('[data-brush]').forEach(b => b.onclick = () => { state.brush = b.dataset.brush; setTool('brush'); });
+$('#size').addEventListener('input', e => setSize(e.target.value));
+$('#opacity').addEventListener('input', e => setOpacity(e.target.value));
+$('#undo').onclick = undo;
+$('#redo').onclick = redo;
+$('#clear').onclick = clearAll;
+$('#color-custom').addEventListener('input', e => setColor(e.target.value));
+SWATCHES.forEach(([name, hex]) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'swatch'; b.dataset.c = hex; b.style.setProperty('--c', hex);
+  b.title = name; b.setAttribute('aria-label', name); b.onclick = () => { setColor(hex); if (state.tool !== 'eraser') { if (state.tool !== 'brush') setTool('brush'); } };
+  $('#swatches').appendChild(b);
+});
+function setTheme(t) {
+  document.documentElement.dataset.theme = t; store.set('theme', t);
+  $$('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeBtn === t)));
+}
+$$('[data-theme-btn]').forEach(b => b.onclick = () => setTheme(b.dataset.themeBtn));
+
+/* ------------------------------------------------------------- brush editor */
+// Sections shown in the editor. `only` lists the engines a section or field applies to.
+const ED_SECTIONS = [
+  { title: 'Shape', only: ['stamp'], fields: [
+    { k: 'shape', label: 'Tip', type: 'select', opts: [['hard', 'Round, hard edge'], ['soft', 'Round, soft edge'], ['flat', 'Chisel'], ['rough', 'Rough, broken edge']] },
+    { k: 'grain', label: 'Paper grain', type: 'select', opts: [['', 'None'], ['fine', 'Fine'], ['coarse', 'Coarse']] },
+    { k: 'grainMode', label: 'Grain behaviour', type: 'select', opts: [['paper', 'Stays on the paper'], ['moving', 'Moves with the brush']] }
+  ] },
+  { title: 'Angle', only: ['stamp'], fields: [
+    { k: 'angleMode', label: 'Tip follows', type: 'select', opts: [['fixed', 'A fixed angle'], ['direction', 'Stroke direction'], ['tilt', 'Pen tilt direction'], ['twist', 'Pen barrel rotation'], ['random', 'Random']] },
+    { k: 'angle', label: 'Angle offset', min: -180, max: 180, unit: '°' },
+    { k: 'angleJit', label: 'Angle jitter', min: 0, max: 45, unit: '°' }
+  ] },
+  { title: 'Stroke', only: ['stamp'], fields: [
+    { k: 'spacing', label: 'Spacing', min: 2, max: 60, unit: '%' },
+    { k: 'scatter', label: 'Scatter', min: 0, max: 60, unit: '%' },
+    { k: 'sizeJit', label: 'Size jitter', min: 0, max: 60, unit: '%' },
+    { k: 'flowJit', label: 'Opacity jitter', min: 0, max: 80, unit: '%' }
+  ] },
+  { title: 'Pressure', only: ['stamp', 'path', 'smudge'], curve: true, fields: [
+    { k: 'sizeMin', label: 'Size at lightest touch', min: 0, max: 100, unit: '%' },
+    { k: 'flowMin', label: 'Opacity at lightest touch', min: 0, max: 100, unit: '%', only: ['stamp'] },
+    { k: 'flowMax', label: 'Opacity at firmest touch', min: 1, max: 100, unit: '%', only: ['stamp'] }
+  ] },
+  { title: 'Pen tilt', only: ['stamp', 'path'], fields: [
+    { k: 'tiltSize', label: 'Bigger when tilted', min: 0, max: 200, unit: '%' },
+    { k: 'tiltFlow', label: 'Lighter when tilted', min: 0, max: 100, unit: '%', only: ['stamp'] },
+    { k: 'tiltShape', label: 'Tip flattens when tilted', min: 0, max: 90, unit: '%', only: ['stamp'] }
+  ] },
+  { title: 'Taper', only: ['stamp', 'path'], fields: [
+    { k: 'taperIn', label: 'Start length', min: 0, max: 40, unit: ' px' },
+    { k: 'minK', label: 'Start size', min: 10, max: 100, unit: '%' },
+    { k: 'taperOut', label: 'End length', min: 0, max: 40, unit: ' px' },
+    { k: 'minOut', label: 'End size', min: 10, max: 100, unit: '%' }
+  ] },
+  { title: 'Blending', only: ['smudge'], fields: [
+    { k: 'pull', label: 'Pull (colour picked up)', min: 2, max: 60, unit: '%' }
+  ] },
+  { title: 'Mouse and touch', only: ['stamp', 'path', 'smudge'], fields: [
+    { k: 'speed', label: 'Lighter when moving fast', min: 0, max: 60, unit: '%' }
+  ] }
+];
+const CURVE_PRESETS = {
+  Linear: LINEAR,
+  Soft: [[0, 0], [.22, .48], [.6, .86], [1, 1]],
+  Firm: [[0, 0], [.42, .14], [.78, .5], [1, 1]],
+  'S-curve': [[0, 0], [.35, .12], [.65, .88], [1, 1]]
+};
+const BRUSH_NAMES = { pencil: 'Pencil', ink: 'Ink', charcoal: 'Charcoal', soft: 'Soft', blend: 'Blending nub' };
+let edKey = null, pvQueued = false, pvL = null;
+const PV_H = 440;
+
+function setBrushSetting(key, k, v) {
+  BS[key] = BS[key] || {};
+  BS[key][k] = v;
+  delete feelCache[key];
+  saveBS();
+  schedulePreview();
+}
+function openBrushEditor() {
+  const key = brushKey();
+  if (key === 'eraser') return;
+  commitPending();
+  edKey = key;
+  $('#bs-title').textContent = 'Brush settings: ' + BRUSH_NAMES[key];
+  buildEditor();
+  $('#brush-dlg').showModal();
+  drawCurve();
+  renderPreview();
+}
+function buildEditor() {
+  const key = edKey, eng = BRUSHES[key].engine, host = $('#bs-sections');
+  host.innerHTML = '';
+  for (const sec of ED_SECTIONS) {
+    if (!sec.only.includes(eng)) continue;
+    const box = document.createElement('section');
+    box.className = 'bs-sec';
+    box.innerHTML = `<h3>${sec.title}</h3>`;
+    if (sec.curve) {
+      box.insertAdjacentHTML('beforeend', `<canvas id="bs-curve" width="440" height="440" aria-label="Pressure curve: drag the points"></canvas>
+        <div class="bs-presets">${Object.keys(CURVE_PRESETS).map(n => `<button class="btn" type="button" data-curve="${n}">${n}</button>`).join('')}</div>
+        <p class="bs-note">Drag the points. Left is a light touch, right is firm.</p>`);
+    }
+    for (const f of sec.fields) {
+      if (f.only && !f.only.includes(eng)) continue;
+      const id = `bs-${f.k}`, val = brushSetting(key, f.k);
+      if (f.type === 'select') {
+        box.insertAdjacentHTML('beforeend', `<label class="bs-row" for="${id}"><span>${f.label}</span>
+          <select id="${id}" data-k="${f.k}">${f.opts.map(([v, t]) => `<option value="${v}"${String(val ?? '') === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>`);
+      } else {
+        box.insertAdjacentHTML('beforeend', `<label class="bs-row" for="${id}"><span>${f.label}</span><output id="${id}-out">${val ?? 0}${f.unit}</output>
+          <input type="range" id="${id}" data-k="${f.k}" data-unit="${f.unit}" min="${f.min}" max="${f.max}" step="1" value="${val ?? 0}"></label>`);
+      }
+    }
+    host.appendChild(box);
+  }
+  host.querySelectorAll('input[type=range][data-k]').forEach(inp => inp.addEventListener('input', () => {
+    $('#' + inp.id + '-out').textContent = inp.value + inp.dataset.unit;
+    setBrushSetting(edKey, inp.dataset.k, Number(inp.value));
+  }));
+  host.querySelectorAll('select[data-k]').forEach(sel => sel.addEventListener('change', () => {
+    setBrushSetting(edKey, sel.dataset.k, sel.value === '' ? null : sel.value);
+  }));
+  host.querySelectorAll('[data-curve]').forEach(b => b.addEventListener('click', () => {
+    setBrushSetting(edKey, 'curve', CURVE_PRESETS[b.dataset.curve].map(p => p.slice()));
+    drawCurve();
+  }));
+  const cv = $('#bs-curve');
+  if (cv) wireCurve(cv);
+}
+
+/* pressure curve widget */
+function curvePts() { return (brushSetting(edKey, 'curve') || LINEAR).map(p => p.slice()); }
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888'; }
+function drawCurve() {
+  const cv = $('#bs-curve');
+  if (!cv) return;
+  const g = cv.getContext('2d'), N = cv.width, pad = 34, S = N - pad * 2, pts = curvePts(), lut = makeLUT(pts);
+  g.clearRect(0, 0, N, N);
+  g.strokeStyle = cssVar('--line'); g.lineWidth = 1.5;
+  for (let i = 0; i <= 4; i++) {
+    const v = pad + S * i / 4;
+    g.beginPath(); g.moveTo(pad, v); g.lineTo(pad + S, v); g.stroke();
+    g.beginPath(); g.moveTo(v, pad); g.lineTo(v, pad + S); g.stroke();
+  }
+  g.setLineDash([6, 6]); g.beginPath(); g.moveTo(pad, pad + S); g.lineTo(pad + S, pad); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = cssVar('--ink'); g.lineWidth = 4; g.beginPath();
+  for (let i = 0; i <= 100; i++) { const x = i / 100, y = lut(x); const px = pad + x * S, py = pad + (1 - y) * S; i ? g.lineTo(px, py) : g.moveTo(px, py); }
+  g.stroke();
+  g.fillStyle = cssVar('--accent');
+  for (const [x, y] of pts) { g.beginPath(); g.arc(pad + x * S, pad + (1 - y) * S, 11, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = cssVar('--muted'); g.font = '20px system-ui, sans-serif';
+  g.fillText('light', pad, N - 4); g.textAlign = 'right'; g.fillText('firm', pad + S, N - 4); g.textAlign = 'left';
+}
+function wireCurve(cv) {
+  let drag = -1;
+  const toUnit = e => {
+    const r = cv.getBoundingClientRect(), pad = 34 / cv.width, S = 1 - pad * 2;
+    return [clamp(((e.clientX - r.left) / r.width - pad) / S, 0, 1), clamp(1 - ((e.clientY - r.top) / r.height - pad) / S, 0, 1)];
+  };
+  cv.addEventListener('pointerdown', e => {
+    const [x, y] = toUnit(e), pts = curvePts();
+    let best = -1, bd = .08;
+    pts.forEach((p, i) => { const dd = Math.hypot(p[0] - x, p[1] - y); if (dd < bd) { bd = dd; best = i; } });
+    if (best < 0) return;
+    drag = best;
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (drag < 0) return;
+    const [x, y] = toUnit(e), pts = curvePts(), last = pts.length - 1;
+    // End points stay at the left and right edges; middle points keep their order.
+    const nx = drag === 0 ? 0 : drag === last ? 1 : clamp(x, pts[drag - 1][0] + .03, pts[drag + 1][0] - .03);
+    pts[drag] = [nx, y];
+    setBrushSetting(edKey, 'curve', pts);
+    drawCurve();
+  });
+  const end = () => { drag = -1; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+}
+
+/* live preview: the real engine draws sample strokes onto a private layer */
+function schedulePreview() {
+  if (pvQueued) return;
+  pvQueued = true;
+  requestAnimationFrame(() => { pvQueued = false; renderPreview(); });
+}
+function previewStroke(key, pts) {
+  beginStroke(pts[0], { key, L: pvL, preview: true });
+  for (let i = 1; i < pts.length; i++) { feedStroke(pts[i]); if (i % 4 === 0) flushTail(); }
+  flushTail(); regrain();
+  endStroke();
+}
+function samplePts(n, fn) {
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const u = i / n, o = fn(u);
+    out.push({ k: 1, t: i * 8, pen: true, tilt: 0, ax: Math.cos(-.9), ay: Math.sin(-.9), tw: 0, ...o });
+  }
+  return out;
+}
+function renderPreview() {
+  if (!edKey) return;
+  if (!pvL) {
+    const c = mk(W, PV_H), d = mk(W, PV_H);
+    pvL = { id: '__preview', name: 'Preview', visible: true, canvas: c, g: c.getContext('2d'), dry: d, dg: d.getContext('2d') };
+  }
+  pvL.g.clearRect(0, 0, W, PV_H); pvL.dg.clearRect(0, 0, W, PV_H);
+  const key = edKey, f = feel(key), wave = (u, y, a) => y + Math.sin(u * Math.PI * 2) * a;
+  if (key === 'blend') {
+    previewStroke('pencil', samplePts(80, u => ({ x: 100 + u * (W - 200), y: wave(u, 120, 30), p: .9 })));
+    previewStroke('charcoal', samplePts(80, u => ({ x: 100 + u * (W - 200), y: wave(u, 260, 30), p: .9 })));
+    for (let i = 0; i < 4; i++) {
+      const x = 260 + i * 260;
+      previewStroke('blend', samplePts(50, u => ({ x: x + u * 40, y: 60 + u * 300, p: .3 + .7 * Math.sin(Math.PI * u) })));
+    }
+  } else {
+    previewStroke(key, samplePts(90, u => ({ x: 90 + u * (W - 180), y: wave(u, 140, 50), p: Math.sin(Math.PI * u) })));
+    if (f.tiltSize || f.tiltFlow || f.tiltShape || f.angleMode === 'tilt' || f.angleMode === 'twist') {
+      previewStroke(key, samplePts(90, u => ({ x: 90 + u * (W - 180), y: wave(u, 330, 30), p: .75, tilt: u, tw: u * Math.PI * 2 })));
+    }
+  }
+  const c = $('#bs-preview'), g = c.getContext('2d');
+  g.fillStyle = PAPER; g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(pvL.dry, 0, 0, W, PV_H, 0, 0, c.width, c.height);
+  g.drawImage(pvL.canvas, 0, 0, W, PV_H, 0, 0, c.width, c.height);
+  g.fillStyle = '#7a808a'; g.font = '13px system-ui, sans-serif';
+  if (key !== 'blend') {
+    g.fillText('pressure: light → firm → light', 10, 18);
+    if (f.tiltSize || f.tiltFlow || f.tiltShape || f.angleMode === 'tilt' || f.angleMode === 'twist') g.fillText('pen upright → tilted (and rotating)', 10, c.height * 255 / PV_H);
+  } else g.fillText('blending across pencil (top) and charcoal (bottom)', 10, 18);
+}
+$('#brush-edit').addEventListener('click', openBrushEditor);
+$('#bs-done').addEventListener('click', () => $('#brush-dlg').close());
+$('#bs-reset').addEventListener('click', () => {
+  delete BS[edKey]; delete feelCache[edKey]; saveBS();
+  buildEditor(); drawCurve(); renderPreview();
+});
+$('#brush-dlg').addEventListener('close', () => { edKey = null; syncToolUI(); });
+
+window.addEventListener('keydown', e => {
+  if (document.querySelector('dialog[open]')) return;
+  const t = e.target;
+  if (t && t.matches && t.matches('input[type=text],textarea')) return;
+  const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+  if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if (mod && k === 'y') { e.preventDefault(); redo(); return; }
+  if (mod || e.altKey) return;
+  const key = brushKey();
+  const step = Math.max(1, Math.round(state.sizes[key] * .12));
+  if (k === ' ') { e.preventDefault(); if (t && t.blur) t.blur(); toggleClock(); }
+  else if (k === 'b') setTool('brush');
+  else if (k === 'e') setTool('eraser');
+  else if (k === 'n') setTool('blend');
+  else if (k === 'l') setTool('lasso');
+  else if (k === 'i') setTool('dropper');
+  else if (k === '[') setSize(state.sizes[key] - step);
+  else if (k === ']') setSize(state.sizes[key] + step);
+  else if (k === 'f') toggleMirror();
+  else if (k === 's') swapSide();
+  else if (k === 'r') changeRef();
+  else if (k === 'enter' && sel) applySelection();
+  else if (k === 'escape' && sel) cancelSelection();
+  else if (/^[1-4]$/.test(k)) setLayer([...layers].reverse()[Number(k) - 1].id);
+});
+window.addEventListener('keyup', e => { if (e.key === ' ' && !document.querySelector('dialog[open]')) e.preventDefault(); });
+window.addEventListener('beforeunload', e => {
+  if (session.phase !== 'free' || hist.undo.length) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ---------------------------------------------------------------------- init */
+setTheme(store.get('theme', window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+if (store.get('refLeft', false)) $('#desk').classList.add('ref-left');
+syncRefPrefsUI();
+if (usesOnline()) { pendingShow = true; refillOnline(); refillPoses(); }
+setColor(state.color);
+renderLayers(); syncToolUI(); syncHistoryButtons(); updateRefCount(); composite(); updateBar();
+})();
+</script>
+</body>
+</html>
